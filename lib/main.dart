@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -23,8 +24,10 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await SqliteService.instance.database;
-  await NotificationService.instance.initialize();
+  if (!kIsWeb) {
+    await SqliteService.instance.database;
+    await NotificationService.instance.initialize();
+  }
 
   runApp(
     const ProviderScope(
