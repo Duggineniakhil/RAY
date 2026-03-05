@@ -58,9 +58,6 @@ An AI-powered Short Video Viewer App inspired by TikTok, built with Flutter and 
    - Place `GoogleService-Info.plist` in `ios/Runner/`
    - Use FlutterFire CLI to generate `lib/firebase_options.dart`.
 
-5. **Dummy Data (Optional)**
-   Call `DummyDataService.seedAll(FirebaseFirestore.instance)` once in your `main()` function to pre-populate the app with sample users, videos, and comments for testing.
-
 6. **Run the App**
    ```bash
    flutter run
