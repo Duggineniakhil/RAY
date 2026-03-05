@@ -9,6 +9,7 @@ import 'package:reelify/features/video_feed/presentation/widgets/video_card.dart
 import 'package:reelify/features/voice_assistant/voice_search_service.dart';
 import 'package:reelify/services/offline/sqlite_service.dart';
 import 'package:reelify/widgets/custom_bottom_nav.dart';
+import 'package:reelify/core/services/dummy_data_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -23,11 +24,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _navIndex = 0;
   final VoiceSearchService _voiceSearch = VoiceSearchService();
   bool _isOffline = false;
+  bool _isScreenActive = true;
 
   @override
   void initState() {
     super.initState();
     _checkConnectivity();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _seedDummyDataIfNeeded();
+    });
+  }
+
+  Future<void> _seedDummyDataIfNeeded() async {
+    final feedState = ref.read(videoFeedProvider);
+    if (!feedState.isLoading && feedState.videos.isEmpty) {
+      await DummyDataService.seedVideos();
+      if (mounted) {
+        ref.read(videoFeedProvider.notifier).refreshFeed();
+      }
+    }
   }
 
   Future<void> _checkConnectivity() async {
@@ -93,7 +108,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         leading: IconButton(
           icon: const Icon(Icons.qr_code_scanner_rounded,
               color: Colors.white),
-          onPressed: () => context.push('/home/qr-scanner'),
+          onPressed: () async {
+            setState(() => _isScreenActive = false);
+            await context.push('/home/qr-scanner');
+            if (mounted) setState(() => _isScreenActive = true);
+          },
         ),
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -156,18 +175,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     }
                     return VideoCard(
                       video: feedState.videos[index],
-                      isActive: index == _currentIndex,
+                      isActive: index == _currentIndex && _isScreenActive,
                       onLike: user != null
                           ? () => ref
                               .read(videoFeedProvider.notifier)
                               .toggleLike(feedState.videos[index].id, user.id)
                           : null,
-                      onComment: () => context.push(
-                        '/home/comments/${feedState.videos[index].id}',
-                      ),
-                      onProfile: () => context.push(
-                        '/home/profile/${feedState.videos[index].creatorId}',
-                      ),
+                      onComment: () async {
+                        setState(() => _isScreenActive = false);
+                        await context.push(
+                          '/home/comments/${feedState.videos[index].id}',
+                        );
+                        if (mounted) setState(() => _isScreenActive = true);
+                      },
+                      onProfile: () async {
+                        setState(() => _isScreenActive = false);
+                        await context.push(
+                          '/home/profile/${feedState.videos[index].creatorId}',
+                        );
+                        if (mounted) setState(() => _isScreenActive = true);
+                      },
                     );
                   },
                 ),
@@ -198,23 +225,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _navIndex,
-        onTap: (i) {
-          setState(() => _navIndex = i);
+        onTap: (i) async {
+          setState(() {
+            _navIndex = i;
+            _isScreenActive = false;
+          });
           switch (i) {
             case 1:
-              context.push('/home/explore');
+              await context.push('/home/explore');
               break;
             case 2:
-              context.push('/home/upload');
+              await context.push('/home/upload');
               break;
             case 3:
-              context.push('/home/messaging');
+              await context.push('/home/messaging');
               break;
             case 4:
               if (user != null) {
-                context.push('/home/profile/${user.id}');
+                await context.push('/home/profile/${user.id}');
               }
               break;
+          }
+          if (mounted) {
+            setState(() {
+              _isScreenActive = true;
+              _navIndex = 0; // Reset to Home nav icon since we are back
+            });
           }
         },
       ),

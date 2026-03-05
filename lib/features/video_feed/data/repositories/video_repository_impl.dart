@@ -173,8 +173,6 @@ class VideoRepositoryImpl implements VideoRepository {
 
       final videoIds = likesSnapshot.docs.map((d) => d.reference.parent.parent!.id).toList();
       
-      // Firestore `whereIn` accepts max 10 items. For a robust app, you paginate this or chunk it.
-      // Here we chunk by 10 and fetch concurrently to get all liked videos quickly.
       List<VideoModel> likedVideos = [];
       for (var i = 0; i < videoIds.length; i += 10) {
         final chunk = videoIds.sublist(i, i + 10 > videoIds.length ? videoIds.length : i + 10);
@@ -184,14 +182,32 @@ class VideoRepositoryImpl implements VideoRepository {
             .get();
         likedVideos.addAll(snapshot.docs.map((doc) => VideoModel.fromFirestore(doc)));
       }
+      likedVideos.sort((a, b) => b.uploadTime.compareTo(a.uploadTime)); // Sort locally
       return likedVideos;
     }
 
     final snapshot = await _firestore
         .collection(AppConstants.videosCollection)
         .where('creatorId', isEqualTo: userId)
-        .orderBy('uploadTime', descending: true)
         .get();
-    return snapshot.docs.map((doc) => VideoModel.fromFirestore(doc)).toList();
+    final userVideos = snapshot.docs.map((doc) => VideoModel.fromFirestore(doc)).toList();
+    userVideos.sort((a, b) => b.uploadTime.compareTo(a.uploadTime)); // Sort locally to avoid indexing issue
+    return userVideos;
+  }
+
+  @override
+  Future<void> deleteVideo(String videoId) async {
+    await _firestore.collection(AppConstants.videosCollection).doc(videoId).delete();
+  }
+
+  @override
+  Future<void> reportVideo(String videoId, String reason, String reporterId) async {
+    await _firestore.collection('reports').add({
+      'videoId': videoId,
+      'reporterId': reporterId,
+      'reason': reason,
+      'timestamp': FieldValue.serverTimestamp(),
+      'status': 'pending',
+    });
   }
 }

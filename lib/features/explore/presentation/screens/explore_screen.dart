@@ -170,9 +170,11 @@ class _VideoGridTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Stack(
-      fit: StackFit.expand,
-      children: [
+    return GestureDetector(
+      onTap: () => context.push('/home/video', extra: video),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
         video.thumbnail.isNotEmpty
             ? Image.network(video.thumbnail, fit: BoxFit.cover,
                 errorBuilder: (_, __, ___) => Container(color: theme.colorScheme.surface))

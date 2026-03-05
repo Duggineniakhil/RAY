@@ -15,4 +15,6 @@ abstract class VideoRepository {
   Future<void> shareVideo(String videoId);
   Future<VideoModel?> getVideoById(String videoId);
   Future<List<VideoModel>> getUserVideos(String userId, {bool likedOnly = false});
+  Future<void> deleteVideo(String videoId);
+  Future<void> reportVideo(String videoId, String reason, String reporterId);
 }

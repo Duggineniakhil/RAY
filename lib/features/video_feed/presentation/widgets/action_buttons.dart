@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reelify/core/theme/app_theme.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
+import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
+import 'package:reelify/features/video_feed/presentation/providers/video_feed_provider.dart';
 
-class ActionButtons extends StatelessWidget {
+class ActionButtons extends ConsumerWidget {
   final VideoModel video;
   final VoidCallback? onLike;
   final VoidCallback? onComment;
@@ -20,7 +23,7 @@ class ActionButtons extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -108,7 +111,7 @@ class ActionButtons extends StatelessWidget {
 
         // More options
         GestureDetector(
-          onTap: () {},
+          onTap: () => _showOptions(context, ref),
           child: const Column(
             children: [
               Icon(Icons.more_horiz_rounded, color: Colors.white, size: 28),
@@ -116,6 +119,92 @@ class ActionButtons extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  void _showOptions(BuildContext context, WidgetRef ref) {
+    final currentUser = ref.read(authStateProvider).valueOrNull;
+    final isOwner = currentUser?.id == video.creatorId;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E1E),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              if (isOwner)
+                ListTile(
+                  leading: const Icon(Icons.delete_outline_rounded, color: Colors.red),
+                  title: const Text('Delete Video', style: TextStyle(color: Colors.red)),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    await ref.read(videoRepositoryProvider).deleteVideo(video.id);
+                    ref.read(videoFeedProvider.notifier).refreshFeed();
+                  },
+                ),
+              ListTile(
+                leading: const Icon(Icons.flag_outlined, color: Colors.white),
+                title: const Text('Report', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showReportDialog(context, ref, currentUser?.id ?? 'anonymous');
+                },
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showReportDialog(BuildContext context, WidgetRef ref, String reporterId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E1E1E),
+          title: const Text('Report Video', style: TextStyle(color: Colors.white)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: ['Spam', 'Inappropriate content', 'Harassment']
+                .map((r) => ListTile(
+                      title: Text(r, style: const TextStyle(color: Colors.white)),
+                      onTap: () async {
+                        Navigator.pop(context);
+                        await ref.read(videoRepositoryProvider).reportVideo(video.id, r, reporterId);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Video reported')),
+                          );
+                        }
+                      },
+                    ))
+                .toList(),
+          ),
+          actions: [
+             TextButton(
+               onPressed: () => Navigator.pop(context),
+               child: const Text('Cancel')
+             )
+          ]
+        );
+      }
     );
   }
 }

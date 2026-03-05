@@ -391,13 +391,16 @@ class _VideoGrid extends ConsumerWidget {
             childAspectRatio: 0.6,
           ),
           itemCount: videos.length,
-          itemBuilder: (context, i) => Container(
-            color: theme.colorScheme.surface,
-            child: videos[i].thumbnail.isNotEmpty
-                ? Image.network(videos[i].thumbnail, fit: BoxFit.cover)
-                : Center(
-                    child: Icon(Icons.play_circle_outline_rounded,
-                        color: theme.hintColor, size: 32)),
+          itemBuilder: (context, i) => GestureDetector(
+            onTap: () => context.push('/home/video', extra: videos[i]),
+            child: Container(
+              color: theme.colorScheme.surface,
+              child: videos[i].thumbnail.isNotEmpty
+                  ? Image.network(videos[i].thumbnail, fit: BoxFit.cover)
+                  : Center(
+                      child: Icon(Icons.play_circle_outline_rounded,
+                          color: theme.hintColor, size: 32)),
+            ),
           ),
         );
       },

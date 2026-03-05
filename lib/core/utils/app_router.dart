@@ -15,6 +15,8 @@ import 'package:reelify/features/settings/terms_of_service_screen.dart';
 import 'package:reelify/features/settings/privacy_policy_screen.dart';
 import 'package:reelify/features/explore/presentation/screens/explore_screen.dart';
 import 'package:reelify/features/messaging/presentation/screens/messaging_screen.dart';
+import 'package:reelify/features/video_feed/domain/models/video_model.dart';
+import 'package:reelify/features/video_feed/presentation/screens/single_video_screen.dart';
 import 'package:riverpod/riverpod.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -134,6 +136,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 },
               ),
             ],
+          ),
+          GoRoute(
+            path: 'video',
+            name: 'video',
+            builder: (context, state) {
+              final video = state.extra as VideoModel;
+              return SingleVideoScreen(video: video);
+            },
           ),
         ],
       ),

@@ -222,7 +222,7 @@ class _VideoCardState extends ConsumerState<VideoCard>
           // Right side action buttons
           Positioned(
             right: 12,
-            bottom: 100,
+            bottom: 20,
             child: ActionButtons(
               video: widget.video,
               onLike: widget.onLike,
@@ -238,7 +238,7 @@ class _VideoCardState extends ConsumerState<VideoCard>
           Positioned(
             left: 12,
             right: 80,
-            bottom: 90,
+            bottom: 10,
             child: VideoInfoOverlay(video: widget.video),
           ),
 
@@ -266,7 +266,7 @@ class _VideoCardState extends ConsumerState<VideoCard>
           // Video progress bar
           if (_isInitialized && _controller != null)
             Positioned(
-              bottom: 82,
+              bottom: 0,
               left: 0,
               right: 0,
               child: VideoProgressIndicator(
