@@ -66,12 +66,23 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       isFollowing = followDoc.exists;
     }
 
+    // Sync stats from the live video feed to fix stale denormalized counts
+    try {
+      await _statsService.syncStats(widget.userId);
+    } catch (_) {}
+
     // Load pre-calculated stats from service/user model
     final stats = await _statsService.getUserStats(widget.userId);
 
-    if (doc.exists && mounted) {
+    // Refresh user doc in case syncStats updated the counts
+    final freshDoc = await FirebaseFirestore.instance
+        .collection(AppConstants.usersCollection)
+        .doc(widget.userId)
+        .get();
+
+    if (freshDoc.exists && mounted) {
       setState(() {
-        _profileUser = UserModel.fromFirestore(doc);
+        _profileUser = UserModel.fromFirestore(freshDoc);
         _isFollowing = isFollowing;
         _totalLikes = stats['likes']!;
         _videoCount = stats['posts']!;
@@ -426,8 +437,9 @@ class _VideoGrid extends ConsumerWidget {
                   onTap: () => context.push('/home/video', extra: video),
                   child: Container(
                     color: theme.colorScheme.surface,
-                    clipBehavior: Clip.hardEdge,
-                    child: thumbnailWidget,
+                    child: ClipRect(
+                      child: thumbnailWidget,
+                    ),
                   ),
                 );
               },
