@@ -17,6 +17,8 @@ class VideoModel {
   final DateTime uploadTime;
   final double duration; // seconds
   final bool isLikedByCurrentUser;
+  final String type; // 'image' or 'video'
+  final int filterIndex;
 
   const VideoModel({
     required this.id,
@@ -35,6 +37,8 @@ class VideoModel {
     required this.uploadTime,
     this.duration = 0,
     this.isLikedByCurrentUser = false,
+    this.type = 'video',
+    this.filterIndex = 0,
   });
 
   factory VideoModel.fromFirestore(DocumentSnapshot doc) {
@@ -56,6 +60,8 @@ class VideoModel {
       uploadTime:
           (data['uploadTime'] as Timestamp?)?.toDate() ?? DateTime.now(),
       duration: (data['duration'] ?? 0).toDouble(),
+      type: data['type'] ?? 'video',
+      filterIndex: data['filterIndex'] ?? 0,
     );
   }
 
@@ -75,6 +81,8 @@ class VideoModel {
       'shares': shares,
       'uploadTime': Timestamp.fromDate(uploadTime),
       'duration': duration,
+      'type': type,
+      'filterIndex': filterIndex,
     };
   }
 
@@ -95,6 +103,8 @@ class VideoModel {
     DateTime? uploadTime,
     double? duration,
     bool? isLikedByCurrentUser,
+    String? type,
+    int? filterIndex,
   }) {
     return VideoModel(
       id: id ?? this.id,
@@ -114,6 +124,8 @@ class VideoModel {
       duration: duration ?? this.duration,
       isLikedByCurrentUser:
           isLikedByCurrentUser ?? this.isLikedByCurrentUser,
+      type: type ?? this.type,
+      filterIndex: filterIndex ?? this.filterIndex,
     );
   }
 }

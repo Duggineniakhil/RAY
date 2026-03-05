@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/core/constants/app_constants.dart';
-import 'package:reelify/core/theme/app_theme.dart';
 import 'package:reelify/core/providers/app_providers.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 
@@ -43,7 +42,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ListTile(
               leading: CircleAvatar(
                 radius: 22,
-                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                 backgroundImage: user.profileImage.isNotEmpty ? NetworkImage(user.profileImage) : null,
                 child: user.profileImage.isEmpty
                     ? Icon(Icons.person_rounded, color: Theme.of(context).colorScheme.primary)
@@ -59,7 +58,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           ],
 
           // ── Appearance ───────────────────────────────────
-          _SectionHeader('Appearance'),
+          const _SectionHeader('Appearance'),
           _buildSwitchTile(
             context,
             icon: isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
@@ -80,7 +79,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             leading: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Colors.teal.withOpacity(0.15),
+                color: Colors.teal.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(Icons.language_rounded, color: Colors.teal, size: 20),
@@ -185,7 +184,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: iconColor.withOpacity(0.15),
+          color: iconColor.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: iconColor, size: 20),
@@ -196,7 +195,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           : null,
       trailing: Switch(
         value: value,
-        activeColor: Theme.of(context).colorScheme.primary,
+        activeThumbColor: Theme.of(context).colorScheme.primary,
         onChanged: onChanged,
       ),
     );
@@ -254,22 +253,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _showComingSoonDialog(BuildContext context, String title) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: const Text('This feature is currently under development.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
-}
 
 // ── Section Header ──────────────────────────────────────────────────────────
 
@@ -287,7 +271,7 @@ class _SectionHeader extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
-          color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
+          color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
         ),
       ),
     );
@@ -301,16 +285,14 @@ class _SettingsTile extends StatelessWidget {
   final Color? iconColor;
   final String title;
   final String? subtitle;
-  final Widget? trailing;
-  final VoidCallback? onTap;
+    final VoidCallback? onTap;
 
   const _SettingsTile({
     required this.icon,
     this.iconColor,
     required this.title,
     this.subtitle,
-    this.trailing,
-    this.onTap,
+        this.onTap,
   });
 
   @override
@@ -320,7 +302,7 @@ class _SettingsTile extends StatelessWidget {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, color: color, size: 20),
@@ -329,7 +311,7 @@ class _SettingsTile extends StatelessWidget {
       subtitle: subtitle != null
           ? Text(subtitle!, style: Theme.of(context).textTheme.bodySmall)
           : null,
-      trailing: trailing ?? (onTap != null ? const Icon(Icons.arrow_forward_ios_rounded, size: 14) : null),
+      trailing: (onTap != null ? const Icon(Icons.arrow_forward_ios_rounded, size: 14) : null),
       onTap: onTap,
     );
   }

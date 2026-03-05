@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reelify/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:reelify/features/auth/domain/models/user_model.dart';

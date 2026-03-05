@@ -26,6 +26,7 @@ class _SingleVideoScreenState extends ConsumerState<SingleVideoScreen> {
       body: Stack(
         children: [
           VideoCard(
+            index: 0,
             video: widget.video,
             isActive: _isScreenActive,
             onLike: user != null

@@ -63,11 +63,9 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: AppColors.surface,
-        background: AppColors.background,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: AppColors.textPrimary,
-        onBackground: AppColors.textPrimary,
         error: Color(0xFFCF6679),
       ),
       textTheme: GoogleFonts.outfitTextTheme(
@@ -245,11 +243,9 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         surface: Colors.white,
-        background: Color(0xFFF5F5F5),
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: Color(0xFF1A1A1A),
-        onBackground: Color(0xFF1A1A1A),
         error: Color(0xFFB00020),
       ),
       textTheme: GoogleFonts.outfitTextTheme(

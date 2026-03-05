@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:reelify/core/theme/app_theme.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/features/video_feed/presentation/providers/video_feed_provider.dart';

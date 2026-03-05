@@ -1,0 +1,51 @@
+﻿Resolving dependencies...
+flutter : Because no 
+versions of 
+photofilters match 
+>3.0.1 <4.0.0 and 
+photofilters 3.0.1 
+depends on image 
+^3.0.2, photofilters 
+^3.0.1 requires image 
+^3.0.2.
+At line:1 char:1
++ flutter pub get > 
+pub_get.log 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo     
+         : NotSpecifi  
+  ed: (Because no ve   
+ rs...s image ^3.0.    
+2.:String) [], Rem    
+oteException
+    + FullyQualifiedEr 
+   rorId : NativeComm  
+  andError
+ 
+And because 
+video_trimmer >=5.0.0 
+depends on image 
+^4.5.4, photofilters 
+^3.0.1 is incompatible 
+with video_trimmer 
+>=5.0.0.
+So, because reelify 
+depends on both 
+video_trimmer ^5.0.0 
+and photofilters 
+^3.0.1, version 
+solving failed.
+
+
+You can try the 
+following suggestion 
+to make the pubspec 
+resolve:
+* Consider downgrading 
+your constraint on 
+video_trimmer: flutter 
+pub add video_trimmer:^
+4.0.2-LTS
+Failed to update 
+packages.

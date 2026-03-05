@@ -1,0 +1,71 @@
+﻿Analyzing TikTok App...                                         
+
+   info - Unnecessary braces in a string interpolation - lib\core\services\storage_service.dart:19:27 - unnecessary_brace_in_string_interps
+   info - Don't invoke 'print' in production code - lib\core\services\storage_service.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\storage_service.dart:47:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\services\storage_service.dart:69:7 - avoid_print
+   info - The imported package 'path_provider' isn't a dependency of the importing package - lib\core\services\thumbnail_cache_service.dart:2:8 - depend_on_referenced_packages
+   info - The imported package 'crypto' isn't a dependency of the importing package - lib\core\services\thumbnail_cache_service.dart:4:8 - depend_on_referenced_packages
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\app_theme.dart:66:9 - deprecated_member_use
+   info - 'onBackground' is deprecated and shouldn't be used. Use onSurface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\app_theme.dart:70:9 - deprecated_member_use
+   info - 'background' is deprecated and shouldn't be used. Use surface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\app_theme.dart:248:9 - deprecated_member_use
+   info - 'onBackground' is deprecated and shouldn't be used. Use onSurface instead. This feature was deprecated after v3.18.0-0.1.pre - lib\core\theme\app_theme.dart:252:9 - deprecated_member_use
+   info - The imported package 'riverpod' isn't a dependency of the importing package - lib\core\utils\app_router.dart:23:8 - depend_on_referenced_packages
+   info - Use 'const' with the constructor to improve performance - lib\core\utils\app_router.dart:70:46 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\core\utils\app_router.dart:78:46 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\core\utils\app_router.dart:151:46 - prefer_const_constructors
+warning - Unused import: 'package:flutter/material.dart' - lib\core\utils\camera_filters.dart:1:8 - unused_import
+warning - The declaration '_vintageMatrix' isn't referenced - lib\core\utils\camera_filters.dart:47:20 - unused_element
+   info - Use 'const' with the constructor to improve performance - lib\core\utils\camera_filters.dart:92:3 - prefer_const_constructors
+warning - Unused import: 'package:firebase_auth/firebase_auth.dart' - lib\features\auth\presentation\providers\auth_provider.dart:1:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\login_screen.dart:110:54 - deprecated_member_use
+warning - Unused import: 'package:reelify/core/theme/app_theme.dart' - lib\features\auth\presentation\screens\signup_screen.dart:5:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\presentation\screens\splash_screen.dart:67:68 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\features\explore\presentation\screens\explore_screen.dart:50:38 - use_build_context_synchronously
+warning - The value of the local variable 'l10n' isn't used - lib\features\explore\presentation\screens\explore_screen.dart:261:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\messaging\presentation\screens\messaging_screen.dart:76:78 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\messaging\presentation\screens\messaging_screen.dart:173:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\messaging\presentation\screens\messaging_screen.dart:306:76 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\messaging\presentation\screens\messaging_screen.dart:419:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\messaging\presentation\screens\messaging_screen.dart:478:51 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\messaging\presentation\screens\messaging_screen.dart:518:57 - deprecated_member_use
+warning - Unused import: 'package:reelify/core/theme/app_theme.dart' - lib\features\profile\presentation\widgets\edit_profile_dialog.dart:9:8 - unused_import
+warning - Unused import: 'package:reelify/core/theme/app_theme.dart' - lib\features\qr_scanner\qr_scanner_screen.dart:4:8 - unused_import
+   info - Use 'const' with the constructor to improve performance - lib\features\qr_scanner\qr_scanner_screen.dart:123:11 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\qr_scanner\qr_scanner_screen.dart:127:20 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\qr_scanner\qr_scanner_screen.dart:128:25 - prefer_const_literals_to_create_immutables
+warning - Unused import: 'package:reelify/core/theme/app_theme.dart' - lib\features\settings\settings_screen.dart:6:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\settings_screen.dart:46:72 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\settings\settings_screen.dart:62:11 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\settings_screen.dart:83:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\settings_screen.dart:188:28 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\settings\settings_screen.dart:199:9 - deprecated_member_use
+warning - The declaration '_showComingSoonDialog' isn't referenced - lib\features\settings\settings_screen.dart:257:8 - unused_element
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\settings_screen.dart:290:56 - deprecated_member_use
+warning - A value for optional parameter 'trailing' isn't ever given - lib\features\settings\settings_screen.dart:312:10 - unused_element_parameter
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\settings_screen.dart:323:24 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\upload_video\presentation\screens\camera_screen.dart:452:41 - deprecated_member_use
+warning - Unused import: 'package:firebase_storage/firebase_storage.dart' - lib\features\upload_video\presentation\screens\upload_screen.dart:4:8 - unused_import
+warning - Duplicate import - lib\features\upload_video\presentation\screens\upload_screen.dart:11:8 - duplicate_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\upload_video\presentation\screens\upload_screen.dart:202:64 - deprecated_member_use
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\features\upload_video\presentation\screens\upload_screen.dart:232:17 - deprecated_member_use
+warning - The value of the field '_currentIndex' isn't used - lib\features\video_feed\presentation\providers\video_controller_manager.dart:10:7 - unused_field
+   info - Unnecessary use of 'toList' in a spread - lib\features\video_feed\presentation\providers\video_feed_provider.dart:90:76 - unnecessary_to_list_in_spreads
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\video_feed\presentation\screens\home_screen.dart:219:40 - deprecated_member_use
+warning - Unused import: 'package:reelify/core/theme/app_theme.dart' - lib\features\video_feed\presentation\widgets\action_buttons.dart:4:8 - unused_import
+warning - Unused import: 'package:reelify/core/theme/app_theme.dart' - lib\features\video_feed\presentation\widgets\video_card.dart:9:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\video_feed\presentation\widgets\video_card.dart:224:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\video_feed\presentation\widgets\video_card.dart:225:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\video_feed\presentation\widgets\video_card.dart:239:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\video_feed\presentation\widgets\video_card.dart:298:39 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\video_feed\presentation\widgets\video_info_overlay.dart:34:39 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\video_feed\presentation\widgets\video_info_overlay.dart:95:9 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\video_feed\presentation\widgets\video_info_overlay.dart:96:21 - prefer_const_literals_to_create_immutables
+   info - Use 'const' with the constructor to improve performance - lib\features\video_feed\presentation\widgets\video_info_overlay.dart:100:13 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\main.dart:53:31 - prefer_const_literals_to_create_immutables
+warning - Unused import: 'dart:convert' - lib\services\notification_service.dart:1:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\custom_bottom_nav.dart:58:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\widgets\gradient_button.dart:40:46 - deprecated_member_use
+warning - Unused import: 'package:flutter/material.dart' - test\widget_test.dart:1:8 - unused_import
+warning - Unused import: 'package:reelify/main.dart' - test\widget_test.dart:4:8 - unused_import
+

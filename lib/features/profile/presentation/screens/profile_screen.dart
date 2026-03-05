@@ -3,14 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:reelify/core/constants/app_constants.dart';
 import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/core/utils/camera_filters.dart';
 import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/domain/models/user_model.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
 import 'package:reelify/features/video_feed/presentation/providers/video_feed_provider.dart';
 import 'package:reelify/features/profile/presentation/widgets/edit_profile_dialog.dart';
+import 'package:reelify/features/profile/data/services/profile_stats_service.dart';
+import 'package:reelify/core/services/thumbnail_cache_service.dart';
+import 'dart:io';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final String userId;
@@ -28,6 +33,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   bool _isLoading = true;
   int _totalLikes = 0;
   int _videoCount = 0;
+  final _statsService = ProfileStatsService();
 
   @override
   void initState() {
@@ -60,26 +66,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       isFollowing = followDoc.exists;
     }
 
-    // Load video count and total likes
-    int totalLikes = 0;
-    int videoCount = 0;
-    try {
-      final videosSnap = await FirebaseFirestore.instance
-          .collection('videos')
-          .where('creatorId', isEqualTo: widget.userId)
-          .get();
-      videoCount = videosSnap.docs.length;
-      for (final vDoc in videosSnap.docs) {
-        totalLikes += (vDoc.data()['likes'] as int?) ?? 0;
-      }
-    } catch (_) {}
+    // Load pre-calculated stats from service/user model
+    final stats = await _statsService.getUserStats(widget.userId);
 
     if (doc.exists && mounted) {
       setState(() {
         _profileUser = UserModel.fromFirestore(doc);
         _isFollowing = isFollowing;
-        _totalLikes = totalLikes;
-        _videoCount = videoCount;
+        _totalLikes = stats['likes']!;
+        _videoCount = stats['posts']!;
         _isLoading = false;
       });
     } else {
@@ -376,9 +371,22 @@ class _VideoGrid extends ConsumerWidget {
         final videos = snapshot.data ?? [];
         if (videos.isEmpty) {
           return Center(
-            child: Text(
-              likedOnly ? 'No liked videos' : 'No videos posted yet',
-              style: TextStyle(color: theme.hintColor),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Lottie.asset(
+                  'assets/animations/empty_state.json',
+                  width: 140,
+                  height: 140,
+                  errorBuilder: (_, __, ___) =>
+                      Icon(Icons.video_library_outlined, color: theme.hintColor, size: 56),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  likedOnly ? 'No liked videos yet' : 'No posts yet',
+                  style: TextStyle(color: theme.hintColor, fontSize: 14),
+                ),
+              ],
             ),
           );
         }
@@ -391,17 +399,40 @@ class _VideoGrid extends ConsumerWidget {
             childAspectRatio: 0.6,
           ),
           itemCount: videos.length,
-          itemBuilder: (context, i) => GestureDetector(
-            onTap: () => context.push('/home/video', extra: videos[i]),
-            child: Container(
-              color: theme.colorScheme.surface,
-              child: videos[i].thumbnail.isNotEmpty
-                  ? Image.network(videos[i].thumbnail, fit: BoxFit.cover)
-                  : Center(
-                      child: Icon(Icons.play_circle_outline_rounded,
-                          color: theme.hintColor, size: 32)),
-            ),
-          ),
+          itemBuilder: (context, i) {
+            final video = videos[i];
+            return FutureBuilder<File?>(
+              future: ThumbnailCacheService().getThumbnail(video.thumbnail),
+              builder: (context, thumbSnapshot) {
+                Widget thumbnailWidget;
+                if (thumbSnapshot.data != null) {
+                  thumbnailWidget = Image.file(thumbSnapshot.data!, fit: BoxFit.cover);
+                } else if (video.thumbnail.isNotEmpty) {
+                  thumbnailWidget = Image.network(video.thumbnail, fit: BoxFit.cover);
+                } else {
+                  thumbnailWidget = const Center(
+                    child: Icon(Icons.play_circle_outline_rounded, color: Colors.white54, size: 32),
+                  );
+                }
+
+                if (appFilters[video.filterIndex].matrix != null) {
+                  thumbnailWidget = ColorFiltered(
+                    colorFilter: ColorFilter.matrix(appFilters[video.filterIndex].matrix!),
+                    child: thumbnailWidget,
+                  );
+                }
+
+                return GestureDetector(
+                  onTap: () => context.push('/home/video', extra: video),
+                  child: Container(
+                    color: theme.colorScheme.surface,
+                    clipBehavior: Clip.hardEdge,
+                    child: thumbnailWidget,
+                  ),
+                );
+              },
+            );
+          },
         );
       },
     );

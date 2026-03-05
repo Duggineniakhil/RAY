@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/domain/models/user_model.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
+import 'package:reelify/core/services/storage_service.dart';
 
 class EditProfileDialog extends ConsumerStatefulWidget {
   final UserModel user;
@@ -17,6 +20,9 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
   late TextEditingController _nameController;
   late TextEditingController _bioController;
   bool _isLoading = false;
+  File? _imageFile;
+  final _picker = ImagePicker();
+  final _storage = StorageService();
 
   @override
   void initState() {
@@ -32,21 +38,33 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
     super.dispose();
   }
 
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    if (pickedFile != null) {
+      setState(() => _imageFile = File(pickedFile.path));
+    }
+  }
+
   Future<void> _save() async {
     setState(() => _isLoading = true);
     try {
       final name = _nameController.text.trim();
       final bio = _bioController.text.trim();
 
+      String? photoUrl;
+      if (_imageFile != null) {
+        photoUrl = await _storage.uploadProfileImage(_imageFile!);
+      }
+
       await ref.read(authRepositoryProvider).updateProfile(
             displayName: name.isNotEmpty ? name : null,
             bio: bio,
-            // Updating username optionally mapping it directly from displayName to keep it simple
+            photoUrl: photoUrl,
             username: name.isNotEmpty ? name.toLowerCase().replaceAll(' ', '_') : null,
           );
 
       if (mounted) {
-        Navigator.pop(context, true); // Return true indicating success
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -67,9 +85,42 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
     return AlertDialog(
       backgroundColor: theme.colorScheme.surface,
       title: Text(l10n.editProfile, style: TextStyle(color: theme.colorScheme.onSurface)),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              children: [
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: CircleAvatar(
+                    radius: 40,
+                    backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                    backgroundImage: _imageFile != null
+                        ? FileImage(_imageFile!)
+                        : (widget.user.profileImage.isNotEmpty
+                            ? NetworkImage(widget.user.profileImage)
+                            : null) as ImageProvider?,
+                    child: _imageFile == null && widget.user.profileImage.isEmpty
+                        ? Icon(Icons.person, size: 40, color: theme.hintColor)
+                        : null,
+                  ),
+                ),
+                Positioned(
+                  bottom: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
           TextField(
             controller: _nameController,
             style: TextStyle(color: theme.colorScheme.onSurface),
@@ -92,6 +143,7 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
           ),
         ],
       ),
+    ),
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.pop(context, false),

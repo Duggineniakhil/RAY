@@ -50,7 +50,7 @@ class ReelifyApp extends ConsumerWidget {
       themeMode: themeMode,
       locale: locale,
       routerConfig: router,
-      localizationsDelegates: [
+      localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,

@@ -1,14 +1,12 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reelify/core/constants/app_constants.dart';
 import 'package:reelify/generated/app_localizations.dart';
-import 'package:reelify/core/constants/app_constants.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/widgets/gradient_button.dart';
 import 'dart:convert';
@@ -112,6 +110,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
         'shares': 0,
         'uploadTime': FieldValue.serverTimestamp(),
         'duration': jsonResponse['duration'] ?? 0,
+        'type': 'video',
       });
 
       if (mounted) {
@@ -199,7 +198,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: theme.colorScheme.primary.withOpacity(0.15),
+                              color: theme.colorScheme.primary.withValues(alpha: 0.15),
                             ),
                             child: Icon(Icons.cloud_upload_outlined,
                                 color: theme.colorScheme.primary, size: 40),
@@ -229,7 +228,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 dropdownColor: theme.colorScheme.surface,
                 style: TextStyle(color: theme.colorScheme.onSurface),
                 decoration: const InputDecoration(

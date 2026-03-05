@@ -130,8 +130,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ],
       ),
-      body: Stack(
-        children: [
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) async {
+          if (details.primaryVelocity != null && details.primaryVelocity! > 300) {
+            setState(() => _isScreenActive = false);
+            await context.push('/home/camera');
+            if (mounted) setState(() => _isScreenActive = true);
+          }
+        },
+        child: Stack(
+          children: [
           // Main feed body
           feedState.videos.isEmpty && feedState.isLoading
               ? Center(
@@ -174,6 +182,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       );
                     }
                     return VideoCard(
+                      index: index,
                       video: feedState.videos[index],
                       isActive: index == _currentIndex && _isScreenActive,
                       onLike: user != null
@@ -207,7 +216,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withOpacity(0.9),
+                  color: Colors.orange.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -223,7 +232,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
         ],
       ),
-      bottomNavigationBar: CustomBottomNav(
+    ),
+    bottomNavigationBar: CustomBottomNav(
         currentIndex: _navIndex,
         onTap: (i) async {
           setState(() {

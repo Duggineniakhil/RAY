@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
 import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
-import 'package:reelify/features/video_feed/presentation/providers/video_feed_provider.dart';
+import 'package:reelify/features/explore/presentation/providers/explore_provider.dart';
+import 'package:go_router/go_router.dart';
 import 'package:reelify/core/constants/app_constants.dart';
 import 'package:reelify/core/services/dummy_data_service.dart';
 
@@ -22,7 +24,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     super.initState();
     if (widget.initialQuery != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(videoFeedProvider.notifier).searchVideos(widget.initialQuery!);
+        ref.read(exploreProvider.notifier).search(widget.initialQuery!);
       });
     }
   }
@@ -44,8 +46,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             tooltip: 'Seed Dummy Data',
             onPressed: () async {
               await DummyDataService.seedVideos();
-              ref.read(videoFeedProvider.notifier).refreshFeed();
-              if (mounted) {
+              ref.read(exploreProvider.notifier).loadTrending();
+              if (!context.mounted) return;
+      if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Dummy videos seeded!')),
                 );
@@ -88,9 +91,9 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                         _selectedCategory = isSelected ? null : category;
                       });
                       if (!isSelected) {
-                        ref.read(videoFeedProvider.notifier).filterByCategory(category);
+                        ref.read(exploreProvider.notifier).loadTrending(category: category);
                       } else {
-                        ref.read(videoFeedProvider.notifier).refreshFeed();
+                        ref.read(exploreProvider.notifier).loadTrending();
                       }
                     },
                   ),
@@ -124,13 +127,21 @@ class _ExploreVideoGrid extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final feedState = ref.watch(videoFeedProvider);
-    final videos = feedState.videos;
+    final exploreState = ref.watch(exploreProvider);
+    final videos = exploreState.trendingVideos;
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
-    if (feedState.isLoading && videos.isEmpty) {
-      return Center(child: CircularProgressIndicator(color: theme.colorScheme.primary));
+    if (exploreState.isLoading && videos.isEmpty) {
+      return Center(
+        child: Lottie.asset(
+          'assets/animations/loading.json',
+          width: 120,
+          height: 120,
+          errorBuilder: (_, __, ___) =>
+              CircularProgressIndicator(color: theme.colorScheme.primary),
+        ),
+      );
     }
 
     if (videos.isEmpty) {
@@ -138,10 +149,18 @@ class _ExploreVideoGrid extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.video_library_outlined, color: theme.hintColor, size: 64),
-            const SizedBox(height: 12),
+            Lottie.asset(
+              'assets/animations/empty_state.json',
+              width: 160,
+              height: 160,
+              errorBuilder: (_, __, ___) =>
+                  Icon(Icons.video_library_outlined, color: theme.hintColor, size: 64),
+            ),
+            const SizedBox(height: 8),
             Text(
-              selectedCategory != null ? '${l10n.noVideosYet} In $selectedCategory' : l10n.noVideosYet,
+              selectedCategory != null
+                  ? 'No videos in $selectedCategory yet'
+                  : l10n.noVideosYet,
               style: TextStyle(color: theme.hintColor),
             ),
           ],
@@ -199,6 +218,7 @@ class _VideoGridTile extends StatelessWidget {
           ),
         ),
       ],
+      ),
     );
   }
 
@@ -229,7 +249,7 @@ class _VideoSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    ref.read(videoFeedProvider.notifier).searchVideos(query);
+    ref.read(exploreProvider.notifier).search(query);
     close(context, query);
     return const SizedBox();
   }
@@ -256,7 +276,6 @@ class _VideoSearchDelegate extends SearchDelegate<String> {
   @override
   ThemeData appBarTheme(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
     return theme.copyWith(
       inputDecorationTheme: InputDecorationTheme(
         border: InputBorder.none,

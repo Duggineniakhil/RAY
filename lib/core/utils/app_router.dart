@@ -9,6 +9,9 @@ import 'package:reelify/features/comments/presentation/screens/comments_screen.d
 import 'package:reelify/features/profile/presentation/screens/profile_screen.dart';
 import 'package:reelify/features/qr_scanner/qr_scanner_screen.dart';
 import 'package:reelify/features/upload_video/presentation/screens/upload_screen.dart';
+import 'package:reelify/features/upload_video/presentation/screens/camera_screen.dart';
+import 'package:reelify/features/upload_video/presentation/screens/media_editor_screen.dart';
+import 'package:reelify/features/upload_video/presentation/screens/post_details_screen.dart';
 import 'package:reelify/features/video_feed/presentation/screens/home_screen.dart';
 import 'package:reelify/features/settings/settings_screen.dart';
 import 'package:reelify/features/settings/terms_of_service_screen.dart';
@@ -17,7 +20,7 @@ import 'package:reelify/features/explore/presentation/screens/explore_screen.dar
 import 'package:reelify/features/messaging/presentation/screens/messaging_screen.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
 import 'package:reelify/features/video_feed/presentation/screens/single_video_screen.dart';
-import 'package:riverpod/riverpod.dart';
+
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
@@ -64,10 +67,50 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'upload',
             name: 'upload',
-            pageBuilder: (context, state) => CustomTransitionPage(
-              child: const UploadScreen(),
+            pageBuilder: (context, state) => const CustomTransitionPage(
+              child: UploadScreen(),
               transitionsBuilder: _slideUpTransition,
             ),
+          ),
+          GoRoute(
+            path: 'camera',
+            name: 'camera',
+            pageBuilder: (context, state) => const CustomTransitionPage(
+              child: CameraScreen(),
+              transitionsBuilder: _slideRightTransition,
+            ),
+          ),
+          GoRoute(
+            path: 'editor',
+            name: 'editor',
+            pageBuilder: (context, state) {
+              final extra = state.extra as Map<String, dynamic>;
+              return CustomTransitionPage(
+                child: MediaEditorScreen(
+                  type: extra['type'] as String,
+                  path: extra['path'] as String,
+                  initialFilterIndex: extra['filterIndex'] as int? ?? 0,
+                  mode: extra['mode'] as CaptureMode? ?? CaptureMode.photo,
+                ),
+                transitionsBuilder: _slideRightTransition,
+              );
+            },
+          ),
+          GoRoute(
+            path: 'post_details',
+            name: 'post_details',
+            pageBuilder: (context, state) {
+              final extra = state.extra as Map<String, dynamic>;
+              return CustomTransitionPage(
+                child: PostDetailsScreen(
+                  type: extra['type'] as String,
+                  path: extra['path'] as String,
+                  filterIndex: extra['filterIndex'] as int? ?? 0,
+                  mode: extra['mode'] as CaptureMode? ?? CaptureMode.photo,
+                ),
+                transitionsBuilder: _slideRightTransition,
+              );
+            },
           ),
           GoRoute(
             path: 'comments/:videoId',
@@ -105,8 +148,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'qr-scanner',
             name: 'qr-scanner',
-            pageBuilder: (context, state) => CustomTransitionPage(
-              child: const QrScannerScreen(),
+            pageBuilder: (context, state) => const CustomTransitionPage(
+              child: QrScannerScreen(),
               transitionsBuilder: _slideUpTransition,
             ),
           ),
@@ -169,6 +212,21 @@ Widget _slideUpTransition(
   return SlideTransition(
     position: Tween<Offset>(
       begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
+    child: child,
+  );
+}
+
+Widget _slideRightTransition(
+  BuildContext context,
+  Animation<double> animation,
+  Animation<double> secondaryAnimation,
+  Widget child,
+) {
+  return SlideTransition(
+    position: Tween<Offset>(
+      begin: const Offset(-1, 0), // Slide in from the left
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOutCubic)),
     child: child,

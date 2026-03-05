@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>We need camera access to capture photos and videos for your posts.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We need microphone access to record audio for your videos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We need photo library access to upload media from your gallery.</string>
 </dict>
 </plist>

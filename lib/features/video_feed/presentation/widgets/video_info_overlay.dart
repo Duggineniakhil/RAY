@@ -31,7 +31,7 @@ class VideoInfoOverlay extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.white30),
                 ),
@@ -92,14 +92,13 @@ class VideoInfoOverlay extends StatelessWidget {
         const SizedBox(height: 8),
 
         // Music note (decorative)
-        Row(
+        const Row(
           children: [
-            const Icon(Icons.music_note_rounded,
-                color: Colors.white, size: 14),
-            const SizedBox(width: 4),
+            Icon(Icons.music_note_rounded, color: Colors.white, size: 14),
+            SizedBox(width: 4),
             Text(
               'Original Sound',
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
                 fontSize: 12,
                 shadows: [Shadow(blurRadius: 4, color: Colors.black87)],

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:reelify/core/theme/app_theme.dart';
 import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/widgets/gradient_button.dart';
@@ -33,6 +32,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
+    final messenger = ScaffoldMessenger.of(context);
     await ref.read(authNotifierProvider.notifier).signUpWithEmail(
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -41,7 +41,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (mounted) {
       final state = ref.read(authNotifierProvider);
       state.whenOrNull(
-        error: (e, _) => ScaffoldMessenger.of(context).showSnackBar(
+        error: (e, _) => messenger.showSnackBar(
           SnackBar(content: Text(e.toString())),
         ),
         data: (user) {

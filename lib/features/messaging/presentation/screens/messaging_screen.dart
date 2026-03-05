@@ -73,7 +73,7 @@ class MessagingScreen extends StatelessWidget {
                     leading: CircleAvatar(
                       radius: 26,
                       backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
-                      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                      backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                       child: avatar.isEmpty
                           ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?',
                               style: TextStyle(
@@ -170,7 +170,7 @@ class _EmptyInbox extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.chat_bubble_outline_rounded,
@@ -303,7 +303,7 @@ class _NewMessageSheetState extends State<_NewMessageSheet> {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
-                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+                    backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
                     child: avatar.isEmpty
                         ? Text(name[0].toUpperCase(),
                             style: TextStyle(color: Theme.of(context).colorScheme.primary))
@@ -416,7 +416,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 return CircleAvatar(
                   radius: 18,
                   backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
-                  backgroundColor: AppColors.primary.withOpacity(0.2),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.2),
                   child: avatar.isEmpty
                       ? Text(widget.otherName[0].toUpperCase(),
                           style: const TextStyle(color: AppColors.primary, fontSize: 14))
@@ -475,7 +475,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.08),
+                              color: Colors.black.withValues(alpha: 0.08),
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
@@ -515,7 +515,7 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: EdgeInsets.fromLTRB(12, 8, 12, MediaQuery.of(context).viewInsets.bottom + 12),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.surface,
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 8)],
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 8)],
             ),
             child: Row(
               children: [

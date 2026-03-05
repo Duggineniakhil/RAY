@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:reelify/core/theme/app_theme.dart';
 
 class QrScannerScreen extends StatefulWidget {
   const QrScannerScreen({super.key});
@@ -120,13 +119,13 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
             ),
           ),
 
-          Positioned(
+          const Positioned(
             bottom: 72,
             left: 0,
             right: 0,
             child: Column(
               children: [
-                const Text(
+                Text(
                   'Point camera at creator\'s QR code',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white70, fontSize: 14),

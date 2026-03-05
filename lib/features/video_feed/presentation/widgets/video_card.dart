@@ -5,7 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lottie/lottie.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
-import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/features/video_feed/presentation/providers/video_controller_manager.dart';
+import 'package:reelify/core/utils/camera_filters.dart';
 import 'package:reelify/features/ai_recommendation/data/interaction_tracker.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
@@ -15,6 +16,7 @@ import 'package:reelify/features/video_feed/presentation/widgets/action_buttons.
 class VideoCard extends ConsumerStatefulWidget {
   final VideoModel video;
   final bool isActive;
+  final int index;
   final VoidCallback? onLike;
   final VoidCallback? onComment;
   final VoidCallback? onProfile;
@@ -23,6 +25,7 @@ class VideoCard extends ConsumerStatefulWidget {
     super.key,
     required this.video,
     required this.isActive,
+    required this.index,
     this.onLike,
     this.onComment,
     this.onProfile,
@@ -58,12 +61,15 @@ class _VideoCardState extends ConsumerState<VideoCard>
   @override
   void didUpdateWidget(VideoCard oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (widget.video.type == 'image') return;
+    
     if (widget.isActive != oldWidget.isActive) {
+      final manager = VideoControllerManager();
       if (widget.isActive) {
-        _controller?.play();
+        manager.play(widget.index);
         _watchStart = DateTime.now();
       } else {
-        _controller?.pause();
+        manager.pause(widget.index);
         _trackWatchExit(skipped: true);
       }
     }
@@ -71,19 +77,26 @@ class _VideoCardState extends ConsumerState<VideoCard>
 
   Future<void> _initVideo() async {
     if (widget.video.videoUrl.isEmpty) return;
-    _controller = VideoPlayerController.networkUrl(
-      Uri.parse(widget.video.videoUrl),
-    );
-    await _controller!.initialize();
-    _controller!.setLooping(true);
-    if (widget.isActive) _controller!.play();
-    if (mounted) setState(() => _isInitialized = true);
+    if (widget.video.type == 'image') {
+      if (mounted) setState(() => _isInitialized = true);
+      return;
+    }
+    
+    final manager = VideoControllerManager();
+    _controller = await manager.getOrCreateController(widget.index, widget.video.videoUrl);
+    
+    if (mounted) {
+      if (_controller != null) {
+        setState(() => _isInitialized = true);
+        if (widget.isActive) manager.play(widget.index);
+      }
+    }
   }
 
   @override
   void dispose() {
     _trackWatchExit();
-    _controller?.dispose();
+    // Do NOT dispose controller here; manager handles it
     _likeAnimController.dispose();
     super.dispose();
   }
@@ -107,7 +120,7 @@ class _VideoCardState extends ConsumerState<VideoCard>
   }
 
   void _togglePlay() {
-    if (_controller == null) return;
+    if (widget.video.type == 'image' || _controller == null) return;
     setState(() {
       if (_controller!.value.isPlaying) {
         _controller!.pause();
@@ -123,6 +136,7 @@ class _VideoCardState extends ConsumerState<VideoCard>
   }
 
   void _toggleMute() {
+    if (widget.video.type == 'image') return;
     setState(() {
       _isMuted = !_isMuted;
       _controller?.setVolume(_isMuted ? 0 : 1);
@@ -151,22 +165,50 @@ class _VideoCardState extends ConsumerState<VideoCard>
           // Black background
           Container(color: Colors.black),
 
-          // Video Player
-          if (_isInitialized && _controller != null)
-            Center(
-              child: AspectRatio(
+          // Player Widget Construction
+          Builder(builder: (context) {
+            Widget? playerWidget;
+            if (widget.video.type == 'image') {
+              playerWidget = Image.network(
+                widget.video.videoUrl,
+                fit: BoxFit.contain,
+                loadingBuilder: (context, child, event) {
+                  if (event == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: theme.colorScheme.primary,
+                      strokeWidth: 2,
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) => 
+                  const Center(child: Icon(Icons.error, color: Colors.white54)),
+              );
+            } else if (_isInitialized && _controller != null) {
+              playerWidget = AspectRatio(
                 aspectRatio: _controller!.value.aspectRatio,
                 child: VideoPlayer(_controller!),
-              ),
-            )
-          else
-            Container(
+              );
+            }
+
+            if (playerWidget != null) {
+              if (appFilters[widget.video.filterIndex].matrix != null) {
+                playerWidget = ColorFiltered(
+                  colorFilter: ColorFilter.matrix(appFilters[widget.video.filterIndex].matrix!),
+                  child: playerWidget,
+                );
+              }
+              return Center(child: playerWidget);
+            }
+
+            return Container(
               color: theme.colorScheme.surface,
               child: Center(
                 child: CircularProgressIndicator(
                     color: theme.colorScheme.primary, strokeWidth: 2),
               ),
-            ),
+            );
+          }),
 
           // Gradient overlay (bottom)
           Positioned.fill(
@@ -178,8 +220,8 @@ class _VideoCardState extends ConsumerState<VideoCard>
                   colors: [
                     Colors.transparent,
                     Colors.transparent,
-                    Colors.black.withOpacity(0.3),
-                    Colors.black.withOpacity(0.75),
+                    Colors.black.withValues(alpha: 0.3),
+                    Colors.black.withValues(alpha: 0.75),
                   ],
                   stops: const [0.0, 0.4, 0.7, 1.0],
                 ),
@@ -193,7 +235,7 @@ class _VideoCardState extends ConsumerState<VideoCard>
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.pause_rounded,
@@ -243,15 +285,16 @@ class _VideoCardState extends ConsumerState<VideoCard>
           ),
 
           // Mute button
-          Positioned(
-            top: 100,
-            right: 12,
-            child: GestureDetector(
-              onTap: _toggleMute,
+          if (widget.video.type != 'image')
+            Positioned(
+              top: 100,
+              right: 12,
+              child: GestureDetector(
+                onTap: _toggleMute,
               child: Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Colors.black.withValues(alpha: 0.4),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
@@ -264,7 +307,7 @@ class _VideoCardState extends ConsumerState<VideoCard>
           ),
 
           // Video progress bar
-          if (_isInitialized && _controller != null)
+          if (widget.video.type != 'image' && _isInitialized && _controller != null)
             Positioned(
               bottom: 0,
               left: 0,

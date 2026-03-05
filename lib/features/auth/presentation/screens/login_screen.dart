@@ -31,6 +31,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
+    final messenger = ScaffoldMessenger.of(context);
     await ref.read(authNotifierProvider.notifier).signInWithEmail(
           email: _emailController.text.trim(),
           password: _passwordController.text,
@@ -39,7 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final state = ref.read(authNotifierProvider);
       state.whenOrNull(
         error: (e, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger.showSnackBar(
             SnackBar(content: Text(e.toString())),
           );
         },
@@ -53,12 +54,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
+    final messenger = ScaffoldMessenger.of(context);
     await ref.read(authNotifierProvider.notifier).signInWithGoogle();
     if (mounted) {
       final state = ref.read(authNotifierProvider);
       state.whenOrNull(
         error: (e, _) {
-          ScaffoldMessenger.of(context).showSnackBar(
+          messenger.showSnackBar(
             SnackBar(content: Text(e.toString())),
           );
         },
@@ -105,7 +107,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withOpacity(0.4),
+                            color: AppColors.primary.withValues(alpha: 0.4),
                             blurRadius: 24,
                             spreadRadius: 2,
                           )
