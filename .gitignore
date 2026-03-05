@@ -10,6 +10,14 @@
 .svn/
 migrate_working_dir/
 
+# Agent Scratch Files
+analyze_*.txt
+analysis_*.txt
+pub_get_*.txt
+fix_warnings*.py
+revert_and_fix*.py
+*.log
+
 # IntelliJ related
 *.iml
 *.ipr
