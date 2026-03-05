@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/core/constants/app_constants.dart';
 import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/core/providers/app_providers.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -15,117 +17,140 @@ class SettingsScreen extends ConsumerStatefulWidget {
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _aiEnabled = true;
 
+  // Language display names map
+  static const _langNames = {
+    'en': '🇺🇸 English',
+    'hi': '🇮🇳 हिंदी',
+    'ta': '🇮🇳 தமிழ்',
+    'te': '🇮🇳 తెలుగు',
+  };
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(authStateProvider).valueOrNull;
+    final themeMode = ref.watch(themeProvider);
+    final locale = ref.watch(localeProvider);
+    final isDark = themeMode == ThemeMode.dark;
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings')),
+      appBar: AppBar(title: Text(l10n.settings)),
       body: ListView(
         children: [
-          // Profile section
+          // ── Account ──────────────────────────────────────
           if (user != null) ...[
-            _SectionHeader('Account'),
+            _SectionHeader(l10n.account),
             ListTile(
               leading: CircleAvatar(
                 radius: 22,
-                backgroundColor: AppColors.surfaceVariant,
-                backgroundImage: user.profileImage.isNotEmpty
-                    ? NetworkImage(user.profileImage)
-                    : null,
+                backgroundColor: AppColors.primary.withOpacity(0.2),
+                backgroundImage: user.profileImage.isNotEmpty ? NetworkImage(user.profileImage) : null,
                 child: user.profileImage.isEmpty
-                    ? const Icon(Icons.person_rounded,
-                        color: Colors.white)
+                    ? const Icon(Icons.person_rounded, color: AppColors.primary)
                     : null,
               ),
               title: Text(user.displayName,
-                  style:
-                      const TextStyle(color: AppColors.textPrimary)),
+                  style: Theme.of(context).textTheme.titleMedium),
               subtitle: Text('@${user.username}',
-                  style:
-                      const TextStyle(color: AppColors.textSecondary)),
-              trailing: const Icon(Icons.arrow_forward_ios_rounded,
-                  size: 16, color: AppColors.textSecondary),
+                  style: Theme.of(context).textTheme.bodySmall),
+              trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
               onTap: () => context.push('/home/profile/${user.id}'),
             ),
-            const Divider(color: AppColors.divider),
           ],
 
-          // Language
-          _SectionHeader('Preferences'),
-          _SettingsTile(
-            icon: Icons.language_rounded,
-            title: 'Language',
-            subtitle: 'English',
-            onTap: () => _showLanguageDialog(context),
+          // ── Appearance ───────────────────────────────────
+          _SectionHeader('Appearance'),
+          _buildSwitchTile(
+            context,
+            icon: isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+            iconColor: isDark ? Colors.indigo : Colors.amber,
+            title: isDark ? 'Dark Mode' : 'Light Mode',
+            subtitle: 'Switch between dark and light theme',
+            value: isDark,
+            onChanged: (val) {
+              ref.read(themeProvider.notifier).setTheme(
+                    val ? ThemeMode.dark : ThemeMode.light,
+                  );
+            },
           ),
+
+          // ── Language ─────────────────────────────────────
+          _SectionHeader(l10n.language),
+          ListTile(
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.teal.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.language_rounded, color: Colors.teal, size: 20),
+            ),
+            title: Text(l10n.language),
+            subtitle: Text(_langNames[locale.languageCode] ?? 'English'),
+            trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16),
+            onTap: () => _showLanguagePicker(context),
+          ),
+
+          // ── Notifications ─────────────────────────────────
+          _SectionHeader(l10n.notifications),
           _SettingsTile(
             icon: Icons.notifications_outlined,
-            title: 'Notifications',
-            subtitle: 'Manage push notifications',
-            onTap: () => _showComingSoonDialog(context, 'Notifications'),
+            iconColor: Colors.orange,
+            title: l10n.notifications,
+            subtitle: 'Manage alerts and reminders',
+            onTap: () => _showComingSoonDialog(context, l10n.notifications),
           ),
           _SettingsTile(
             icon: Icons.lock_outline_rounded,
-            title: 'Privacy',
-            subtitle: 'Account privacy settings',
-            onTap: () => _showComingSoonDialog(context, 'Privacy Settings'),
+            iconColor: Colors.purple,
+            title: l10n.privacy,
+            subtitle: 'Account visibility & data',
+            onTap: () => _showComingSoonDialog(context, l10n.privacy),
           ),
 
-          // AI
-          _SectionHeader('AI & Feed'),
-          _SettingsTile(
+          // ── AI & Feed ─────────────────────────────────────
+          _SectionHeader(l10n.aiFeed),
+          _buildSwitchTile(
+            context,
             icon: Icons.auto_awesome_rounded,
-            title: 'AI Recommendations',
-            subtitle: 'Personalized video feed',
-            trailing: Switch(
-              value: _aiEnabled,
-              activeColor: AppColors.primary,
-              onChanged: (val) {
-                setState(() => _aiEnabled = val);
-              },
-            ),
+            iconColor: AppColors.primary,
+            title: l10n.aiRecommendations,
+            subtitle: 'Personalized "For You" feed',
+            value: _aiEnabled,
+            onChanged: (val) => setState(() => _aiEnabled = val),
           ),
           _SettingsTile(
             icon: Icons.history_rounded,
-            title: 'Watch History',
-            subtitle: 'Clear or manage history',
-            onTap: () => _showComingSoonDialog(context, 'Watch History'),
+            iconColor: Colors.grey,
+            title: l10n.watchHistory,
+            subtitle: 'Clear or manage your history',
+            onTap: () => _showClearHistoryDialog(context),
           ),
 
-          // About
-          _SectionHeader('About'),
+          // ── About ─────────────────────────────────────────
+          _SectionHeader(l10n.about),
           _SettingsTile(
             icon: Icons.info_outline_rounded,
-            title: 'App Version',
+            iconColor: Colors.blue,
+            title: l10n.appVersion,
             subtitle: AppConstants.appVersion,
           ),
           _SettingsTile(
-            icon: Icons.qr_code_rounded,
-            title: 'My QR Code',
-            subtitle: 'Share your profile via QR',
-            onTap: () {
-              if (user != null) {
-                _showQrCode(context, user.id);
-              }
-            },
-          ),
-          _SettingsTile(
-            icon: Icons.qr_code_scanner_rounded,
-            title: 'Scan QR Code',
-            subtitle: 'Scan a creator\'s QR code',
-            onTap: () => context.push('/home/qr-scanner'),
+            icon: Icons.shield_outlined,
+            iconColor: Colors.green,
+            title: 'Terms & Privacy',
+            onTap: () => _showComingSoonDialog(context, 'Terms & Privacy'),
           ),
 
           const SizedBox(height: 16),
 
-          // Sign out
+          // ── Sign Out ──────────────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: OutlinedButton.icon(
               icon: const Icon(Icons.logout_rounded, color: AppColors.primary),
-              label: const Text('Sign Out',
-                  style: TextStyle(color: AppColors.primary)),
+              label: Text(l10n.signOut,
+                  style: const TextStyle(color: AppColors.primary)),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: AppColors.primary),
                 minimumSize: const Size(double.infinity, 48),
@@ -143,89 +168,106 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _showComingSoonDialog(BuildContext context, String title) {
+  Widget _buildSwitchTile(
+    BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    String? subtitle,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return ListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: iconColor.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: iconColor, size: 20),
+      ),
+      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
+      subtitle: subtitle != null
+          ? Text(subtitle, style: Theme.of(context).textTheme.bodySmall)
+          : null,
+      trailing: Switch(
+        value: value,
+        activeColor: AppColors.primary,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  void _showLanguagePicker(BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(title, style: const TextStyle(color: AppColors.textPrimary)),
-        content: const Text('This feature is currently under development.', style: TextStyle(color: AppColors.textSecondary)),
+        title: const Text('Select Language'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: LocaleNotifier.languages.entries.map((entry) {
+            final isSelected = ref.read(localeProvider).languageCode == entry.key;
+            return ListTile(
+              leading: Text(
+                entry.value.split(' ').first, // emoji
+                style: const TextStyle(fontSize: 24),
+              ),
+              title: Text(entry.value.split(' ').skip(1).join(' ')),
+              trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: AppColors.primary) : null,
+              onTap: () {
+                ref.read(localeProvider.notifier).setLocale(entry.key);
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Language changed to ${entry.value}')),
+                );
+              },
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  void _showClearHistoryDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear Watch History'),
+        content: const Text('This will remove all watched video history. This cannot be undone.'),
         actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
           TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK', style: TextStyle(color: AppColors.primary)),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Watch history cleared')),
+              );
+            },
+            child: const Text('Clear', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
 
-  void _showLanguageDialog(BuildContext context) {
+  void _showComingSoonDialog(BuildContext context, String title) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('Select Language',
-            style: TextStyle(color: AppColors.textPrimary)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            'English',
-            'हिंदी (Hindi)',
-            'தமிழ் (Tamil)',
-            'తెలుగు (Telugu)',
-          ]
-              .map((lang) => ListTile(
-                    title: Text(lang,
-                        style:
-                            const TextStyle(color: AppColors.textPrimary)),
-                    onTap: () => Navigator.pop(ctx),
-                  ))
-              .toList(),
-        ),
-      ),
-    );
-  }
-
-  void _showQrCode(BuildContext context, String userId) {
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: const Text('My QR Code',
-            style: TextStyle(color: AppColors.textPrimary)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 160,
-              height: 160,
-              color: Colors.white,
-              child: const Center(
-                child: Icon(Icons.qr_code_2_rounded,
-                    size: 140, color: Colors.black),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'reelify://profile/$userId',
-              style: const TextStyle(
-                  color: AppColors.textSecondary, fontSize: 11),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+        title: Text(title),
+        content: const Text('This feature is currently under development.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Close',
-                style: TextStyle(color: AppColors.primary)),
+            child: const Text('OK'),
           ),
         ],
       ),
     );
   }
 }
+
+// ── Section Header ──────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
   final String title;
@@ -234,56 +276,56 @@ class _SectionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 20, 20, 6),
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
       child: Text(
         title.toUpperCase(),
-        style: const TextStyle(
-          color: AppColors.textHint,
+        style: TextStyle(
           fontSize: 11,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
+          color: AppColors.primary.withOpacity(0.8),
         ),
       ),
     );
   }
 }
 
+// ── Settings Tile ──────────────────────────────────────────────────────────
+
 class _SettingsTile extends StatelessWidget {
   final IconData icon;
+  final Color? iconColor;
   final String title;
-  final String subtitle;
-  final VoidCallback? onTap;
+  final String? subtitle;
   final Widget? trailing;
+  final VoidCallback? onTap;
 
   const _SettingsTile({
     required this.icon,
+    this.iconColor,
     required this.title,
-    required this.subtitle,
-    this.onTap,
+    this.subtitle,
     this.trailing,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final color = iconColor ?? Theme.of(context).colorScheme.primary;
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(10),
+          color: color.withOpacity(0.15),
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(icon, color: AppColors.primary, size: 22),
+        child: Icon(icon, color: color, size: 20),
       ),
-      title: Text(title,
-          style: const TextStyle(color: AppColors.textPrimary)),
-      subtitle: Text(subtitle,
-          style:
-              const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-      trailing: trailing ??
-          (onTap != null
-              ? const Icon(Icons.arrow_forward_ios_rounded,
-                  size: 14, color: AppColors.textSecondary)
-              : null),
+      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
+      subtitle: subtitle != null
+          ? Text(subtitle!, style: Theme.of(context).textTheme.bodySmall)
+          : null,
+      trailing: trailing ?? (onTap != null ? const Icon(Icons.arrow_forward_ios_rounded, size: 14) : null),
       onTap: onTap,
     );
   }

@@ -103,6 +103,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: 'messaging',
             name: 'messaging',
             builder: (context, state) => const MessagingScreen(),
+            routes: [
+              GoRoute(
+                path: 'chat/:convId',
+                name: 'chat',
+                builder: (context, state) {
+                  final extra = state.extra as Map<String, dynamic>? ?? {};
+                  return ChatScreen(
+                    conversationId: state.pathParameters['convId']!,
+                    otherUserId: extra['otherUserId'] as String? ?? '',
+                    otherName: extra['otherName'] as String? ?? 'User',
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),

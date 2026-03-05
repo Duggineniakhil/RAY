@@ -111,16 +111,20 @@ class _SplashScreenState extends State<SplashScreen>
 
               const SizedBox(height: 60),
 
-              // Loading indicator
+              // Lottie loading animation
               SizedBox(
-                width: 40,
-                height: 40,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: AppColors.primary,
-                  backgroundColor: AppColors.primary.withOpacity(0.2),
+                width: 80,
+                height: 80,
+                child: Lottie.asset(
+                  'assets/animations/loading.json',
+                  controller: _controller,
+                  onLoaded: (comp) {
+                    _controller
+                      ..duration = comp.duration
+                      ..repeat();
+                  },
                 ),
-              ).animate(delay: 1000.ms).fadeIn(duration: 400.ms),
+              ).animate(delay: 800.ms).fadeIn(duration: 400.ms),
             ],
           ),
         ),

@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/core/theme/app_theme.dart';
 import 'package:reelify/core/utils/app_router.dart';
+import 'package:reelify/core/providers/app_providers.dart';
 import 'package:reelify/firebase_options.dart';
 import 'package:reelify/services/notification_service.dart';
 import 'package:reelify/services/offline/sqlite_service.dart';
@@ -12,21 +14,16 @@ import 'package:reelify/services/offline/sqlite_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Lock orientation to portrait
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
-  // Initialize Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  // Initialize SQLite
   await SqliteService.instance.database;
-
-  // Initialize Notifications
   await NotificationService.instance.initialize();
 
   runApp(
@@ -42,25 +39,24 @@ class ReelifyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
+    final themeMode = ref.watch(themeProvider);
+    final locale = ref.watch(localeProvider);
 
     return MaterialApp.router(
       title: 'RAY',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.darkTheme,
+      theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
+      themeMode: themeMode,
+      locale: locale,
       routerConfig: router,
-      localizationsDelegates: const [
+      localizationsDelegates: [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      supportedLocales: const [
-        Locale('en'),
-        Locale('hi'),
-        Locale('ta'),
-        Locale('te'),
-      ],
+      supportedLocales: AppLocalizations.supportedLocales,
     );
   }
 }

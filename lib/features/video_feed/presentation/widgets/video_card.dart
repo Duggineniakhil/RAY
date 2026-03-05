@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:lottie/lottie.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/features/ai_recommendation/data/interaction_tracker.dart';
+import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
 import 'package:reelify/features/video_feed/presentation/widgets/video_info_overlay.dart';
 import 'package:reelify/features/video_feed/presentation/widgets/action_buttons.dart';
 
-class VideoCard extends StatefulWidget {
+class VideoCard extends ConsumerStatefulWidget {
   final VideoModel video;
   final bool isActive;
   final VoidCallback? onLike;
@@ -25,10 +29,10 @@ class VideoCard extends StatefulWidget {
   });
 
   @override
-  State<VideoCard> createState() => _VideoCardState();
+  ConsumerState<VideoCard> createState() => _VideoCardState();
 }
 
-class _VideoCardState extends State<VideoCard>
+class _VideoCardState extends ConsumerState<VideoCard>
     with SingleTickerProviderStateMixin {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
@@ -36,6 +40,9 @@ class _VideoCardState extends State<VideoCard>
   bool _isMuted = false;
   late AnimationController _likeAnimController;
   bool _showHeartAnimation = false;
+  bool _liked = false;
+  DateTime? _watchStart;
+  final _tracker = InteractionTracker();
 
   @override
   void initState() {
@@ -45,6 +52,7 @@ class _VideoCardState extends State<VideoCard>
       duration: const Duration(milliseconds: 700),
     );
     _initVideo();
+    if (widget.isActive) _watchStart = DateTime.now();
   }
 
   @override
@@ -53,8 +61,10 @@ class _VideoCardState extends State<VideoCard>
     if (widget.isActive != oldWidget.isActive) {
       if (widget.isActive) {
         _controller?.play();
+        _watchStart = DateTime.now();
       } else {
         _controller?.pause();
+        _trackWatchExit(skipped: true);
       }
     }
   }
@@ -72,9 +82,28 @@ class _VideoCardState extends State<VideoCard>
 
   @override
   void dispose() {
+    _trackWatchExit();
     _controller?.dispose();
     _likeAnimController.dispose();
     super.dispose();
+  }
+
+  void _trackWatchExit({bool skipped = false}) {
+    final userId = ref.read(authStateProvider).valueOrNull?.id;
+    if (userId == null || _watchStart == null) return;
+    final elapsed = DateTime.now().difference(_watchStart!).inSeconds;
+    final duration = _controller?.value.duration.inSeconds ?? 1;
+    final ratio = duration > 0 ? (elapsed / duration).clamp(0.0, 1.0) : 0.0;
+    _watchStart = null;
+    
+    _tracker.trackWatch(
+      userId: userId,
+      videoId: widget.video.id,
+      category: widget.video.category,
+      watchRatio: ratio,
+      liked: _liked,
+      skipped: skipped && ratio < 0.2,
+    );
   }
 
   void _togglePlay() {
@@ -102,6 +131,7 @@ class _VideoCardState extends State<VideoCard>
 
   void _onDoubleTap() {
     HapticFeedback.mediumImpact();
+    setState(() => _liked = true);
     widget.onLike?.call();
     setState(() => _showHeartAnimation = true);
     _likeAnimController.forward(from: 0).then((_) {
@@ -171,23 +201,20 @@ class _VideoCardState extends State<VideoCard>
               ),
             ),
 
-          // Double-tap Heart Animation
+          // Lottie Heart Animation (double-tap like)
           if (_showHeartAnimation)
             Center(
-              child: AnimatedBuilder(
-                animation: _likeAnimController,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: 1.0 + _likeAnimController.value * 0.5,
-                    child: Opacity(
-                      opacity: 1 - _likeAnimController.value,
-                      child: const Icon(
-                        Icons.favorite_rounded,
-                        color: AppColors.heart,
-                        size: 120,
-                      ),
-                    ),
-                  );
+              child: Lottie.asset(
+                'assets/animations/like_heart.json',
+                controller: _likeAnimController,
+                width: 160,
+                height: 160,
+                onLoaded: (comp) {
+                  _likeAnimController
+                    ..duration = comp.duration
+                    ..forward(from: 0).then((_) {
+                      if (mounted) setState(() => _showHeartAnimation = false);
+                    });
                 },
               ),
             ),
