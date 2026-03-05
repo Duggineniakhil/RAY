@@ -11,6 +11,8 @@ import 'package:reelify/features/qr_scanner/qr_scanner_screen.dart';
 import 'package:reelify/features/upload_video/presentation/screens/upload_screen.dart';
 import 'package:reelify/features/video_feed/presentation/screens/home_screen.dart';
 import 'package:reelify/features/settings/settings_screen.dart';
+import 'package:reelify/features/settings/terms_of_service_screen.dart';
+import 'package:reelify/features/settings/privacy_policy_screen.dart';
 import 'package:reelify/features/explore/presentation/screens/explore_screen.dart';
 import 'package:reelify/features/messaging/presentation/screens/messaging_screen.dart';
 import 'package:riverpod/riverpod.dart';
@@ -85,6 +87,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: 'settings',
             name: 'settings',
             builder: (context, state) => const SettingsScreen(),
+            routes: [
+              GoRoute(
+                path: 'terms',
+                name: 'terms',
+                builder: (context, state) => const TermsOfServiceScreen(),
+              ),
+              GoRoute(
+                path: 'privacy',
+                name: 'privacy',
+                builder: (context, state) => const PrivacyPolicyScreen(),
+              ),
+            ],
           ),
           GoRoute(
             path: 'qr-scanner',
@@ -97,7 +111,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'explore',
             name: 'explore',
-            builder: (context, state) => const ExploreScreen(),
+            builder: (context, state) {
+              final query = state.uri.queryParameters['query'];
+              return ExploreScreen(initialQuery: query);
+            },
           ),
           GoRoute(
             path: 'messaging',

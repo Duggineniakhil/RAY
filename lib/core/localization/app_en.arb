@@ -49,5 +49,7 @@
   "caption": "Caption",
   "selectCategory": "Select Category",
   "upload": "Upload",
-  "uploading": "Uploading..."
+  "uploading": "Uploading...",
+  "termsOfService": "Terms of Service",
+  "privacyPolicy": "Privacy Policy"
 }

@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/widgets/gradient_button.dart';
 
@@ -53,6 +54,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -84,11 +87,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 // Username
                 TextFormField(
                   controller: _usernameController,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                  decoration: const InputDecoration(
-                    hintText: 'Username',
+                  style: TextStyle(color: theme.colorScheme.onSurface),
+                  decoration: InputDecoration(
+                    hintText: l10n.username,
                     prefixIcon:
-                        Icon(Icons.person_outline, color: AppColors.textHint),
+                        Icon(Icons.person_outline, color: theme.hintColor),
                   ),
                   validator: (v) => v == null || v.trim().length < 3
                       ? 'Min 3 characters'
@@ -101,11 +104,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
-                  style: const TextStyle(color: AppColors.textPrimary),
-                  decoration: const InputDecoration(
-                    hintText: 'Email address',
+                  style: TextStyle(color: theme.colorScheme.onSurface),
+                  decoration: InputDecoration(
+                    hintText: l10n.email,
                     prefixIcon: Icon(Icons.email_outlined,
-                        color: AppColors.textHint),
+                        color: theme.hintColor),
                   ),
                   validator: (v) =>
                       v == null || !v.contains('@') ? 'Enter valid email' : null,
@@ -117,17 +120,17 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 TextFormField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
-                  style: const TextStyle(color: AppColors.textPrimary),
+                  style: TextStyle(color: theme.colorScheme.onSurface),
                   decoration: InputDecoration(
-                    hintText: 'Password (min 6 chars)',
-                    prefixIcon: const Icon(Icons.lock_outline,
-                        color: AppColors.textHint),
+                    hintText: '${l10n.password} (min 6 chars)',
+                    prefixIcon: Icon(Icons.lock_outline,
+                        color: theme.hintColor),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
                             ? Icons.visibility_off_outlined
                             : Icons.visibility_outlined,
-                        color: AppColors.textHint,
+                        color: theme.hintColor,
                       ),
                       onPressed: () =>
                           setState(() => _obscurePassword = !_obscurePassword),
@@ -140,7 +143,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 const SizedBox(height: 32),
 
                 GradientButton(
-                  label: 'Create Account',
+                  label: l10n.signUp,
                   onPressed: _isLoading ? null : _signUp,
                   isLoading: _isLoading,
                 ).animate(delay: 500.ms).fadeIn().slideY(begin: 0.2),
@@ -156,12 +159,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       GestureDetector(
                         onTap: () => context.pop(),
                         child: Text(
-                          'Sign In',
+                          l10n.signIn,
                           style: Theme.of(context)
                               .textTheme
                               .bodyMedium
                               ?.copyWith(
-                                color: AppColors.primary,
+                                color: theme.colorScheme.primary,
                                 fontWeight: FontWeight.w600,
                               ),
                         ),

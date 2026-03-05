@@ -7,7 +7,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reelify/core/constants/app_constants.dart';
-import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/generated/app_localizations.dart';
+import 'package:reelify/core/constants/app_constants.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/widgets/gradient_button.dart';
 import 'dart:convert';
@@ -137,9 +138,11 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upload Video'),
+        title: Text(l10n.uploadVideo),
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
           onPressed: () => context.pop(),
@@ -157,12 +160,12 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                 width: double.infinity,
                 height: 200,
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
                     color: _videoFile != null
-                        ? AppColors.primary
-                        : AppColors.divider,
+                        ? theme.colorScheme.primary
+                        : theme.dividerColor,
                     width: 2,
                   ),
                 ),
@@ -172,17 +175,17 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                         children: [
                           ClipRRect(
                             borderRadius: BorderRadius.circular(14),
-                            child: const Center(
+                            child: Center(
                               child: Icon(Icons.videocam_rounded,
-                                  color: AppColors.primary, size: 64),
+                                  color: theme.colorScheme.primary, size: 64),
                             ),
                           ),
                           Positioned(
                             bottom: 8,
                             child: Text(
                               _videoFile!.path.split('/').last,
-                              style: const TextStyle(
-                                  color: AppColors.textSecondary,
+                              style: TextStyle(
+                                  color: theme.hintColor,
                                   fontSize: 12),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -196,19 +199,19 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: AppColors.primary.withOpacity(0.15),
+                              color: theme.colorScheme.primary.withOpacity(0.15),
                             ),
-                            child: const Icon(Icons.cloud_upload_outlined,
-                                color: AppColors.primary, size: 40),
+                            child: Icon(Icons.cloud_upload_outlined,
+                                color: theme.colorScheme.primary, size: 40),
                           ),
                           const SizedBox(height: 12),
-                          const Text('Tap to select video',
+                          Text(l10n.selectVideo,
                               style: TextStyle(
-                                  color: AppColors.textPrimary,
+                                  color: theme.colorScheme.onSurface,
                                   fontWeight: FontWeight.w600)),
-                          const Text('MP4, MOV up to 100MB',
+                          Text('MP4, MOV up to 100MB',
                               style: TextStyle(
-                                  color: AppColors.textHint, fontSize: 12)),
+                                  color: theme.hintColor, fontSize: 12)),
                         ],
                       ),
               ),
@@ -217,18 +220,18 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
             const SizedBox(height: 20),
 
             // Category
-            Text('Category',
-                style: Theme.of(context).textTheme.titleSmall),
+            Text(l10n.selectCategory,
+                style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: DropdownButtonFormField<String>(
                 value: _selectedCategory,
-                dropdownColor: AppColors.surface,
-                style: const TextStyle(color: AppColors.textPrimary),
+                dropdownColor: theme.colorScheme.surface,
+                style: TextStyle(color: theme.colorScheme.onSurface),
                 decoration: const InputDecoration(
                   contentPadding: EdgeInsets.symmetric(
                       horizontal: 16, vertical: 12),
@@ -245,14 +248,14 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
             const SizedBox(height: 16),
 
             // Caption
-            Text('Caption',
-                style: Theme.of(context).textTheme.titleSmall),
+            Text(l10n.caption,
+                style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),
             TextField(
               controller: _captionController,
               maxLines: 3,
               maxLength: 150,
-              style: const TextStyle(color: AppColors.textPrimary),
+              style: TextStyle(color: theme.colorScheme.onSurface),
               decoration: const InputDecoration(
                 hintText:
                     'Write a caption... #hashtags encouraged!',
@@ -261,27 +264,26 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
 
             const SizedBox(height: 24),
 
-            // Upload progress
             if (_isUploading) ...[
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: LinearProgressIndicator(
                   value: _uploadProgress,
-                  backgroundColor: AppColors.divider,
-                  color: AppColors.primary,
+                  backgroundColor: theme.dividerColor,
+                  color: theme.colorScheme.primary,
                   minHeight: 6,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
-                'Uploading ${(_uploadProgress * 100).toStringAsFixed(0)}%',
-                style: const TextStyle(color: AppColors.textSecondary),
+                '${l10n.uploading} ${(_uploadProgress * 100).toStringAsFixed(0)}%',
+                style: TextStyle(color: theme.hintColor),
               ),
               const SizedBox(height: 16),
             ],
 
             GradientButton(
-              label: 'Upload Video',
+              label: l10n.uploadVideo,
               onPressed: (_isUploading || _videoFile == null)
                   ? null
                   : _uploadVideo,

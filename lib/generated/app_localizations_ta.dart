@@ -158,4 +158,10 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get uploading => 'பதிவேற்றுகிறது...';
+
+  @override
+  String get termsOfService => 'சேவை விதிமுறைகள்';
+
+  @override
+  String get privacyPolicy => 'தனியுரிமைக் கொள்கை';
 }

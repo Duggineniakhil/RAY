@@ -13,6 +13,7 @@ class UserModel {
   final DateTime createdAt;
   final String bio;
   final bool isVerified;
+  final bool isPrivate;
 
   const UserModel({
     required this.id,
@@ -27,6 +28,7 @@ class UserModel {
     required this.createdAt,
     this.bio = '',
     this.isVerified = false,
+    this.isPrivate = false,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -44,6 +46,7 @@ class UserModel {
       createdAt: (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       bio: data['bio'] ?? '',
       isVerified: data['isVerified'] ?? false,
+      isPrivate: data['isPrivate'] ?? false,
     );
   }
 
@@ -60,6 +63,7 @@ class UserModel {
       'createdAt': Timestamp.fromDate(createdAt),
       'bio': bio,
       'isVerified': isVerified,
+      'isPrivate': isPrivate,
     };
   }
 
@@ -76,6 +80,7 @@ class UserModel {
     DateTime? createdAt,
     String? bio,
     bool? isVerified,
+    bool? isPrivate,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -90,6 +95,7 @@ class UserModel {
       createdAt: createdAt ?? this.createdAt,
       bio: bio ?? this.bio,
       isVerified: isVerified ?? this.isVerified,
+      isPrivate: isPrivate ?? this.isPrivate,
     );
   }
 

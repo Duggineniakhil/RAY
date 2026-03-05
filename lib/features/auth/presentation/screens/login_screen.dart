@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/widgets/gradient_button.dart';
 
@@ -71,6 +72,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -132,11 +135,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
-                    style: const TextStyle(color: AppColors.textPrimary),
-                    decoration: const InputDecoration(
-                      hintText: 'Email address',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                    decoration: InputDecoration(
+                      hintText: l10n.email,
                       prefixIcon: Icon(Icons.email_outlined,
-                          color: AppColors.textHint),
+                          color: theme.hintColor),
                     ),
                     validator: (v) =>
                         v == null || !v.contains('@') ? 'Enter valid email' : null,
@@ -148,17 +151,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   TextFormField(
                     controller: _passwordController,
                     obscureText: _obscurePassword,
-                    style: const TextStyle(color: AppColors.textPrimary),
+                    style: TextStyle(color: theme.colorScheme.onSurface),
                     decoration: InputDecoration(
-                      hintText: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outline,
-                          color: AppColors.textHint),
+                      hintText: l10n.password,
+                      prefixIcon: Icon(Icons.lock_outline,
+                          color: theme.hintColor),
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscurePassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: AppColors.textHint,
+                          color: theme.hintColor,
                         ),
                         onPressed: () =>
                             setState(() => _obscurePassword = !_obscurePassword),
@@ -172,7 +175,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                   // Sign In Button
                   GradientButton(
-                    label: 'Sign In',
+                    label: l10n.signIn,
                     onPressed: _isLoading ? null : _signIn,
                     isLoading: _isLoading,
                   ).animate(delay: 500.ms).fadeIn().slideY(begin: 0.2),
@@ -182,13 +185,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Divider
                   Row(
                     children: [
-                      const Expanded(child: Divider(color: AppColors.divider)),
+                      Expanded(child: Divider(color: theme.dividerColor)),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: Text('or',
                             style: Theme.of(context).textTheme.bodySmall),
                       ),
-                      const Expanded(child: Divider(color: AppColors.divider)),
+                      Expanded(child: Divider(color: theme.dividerColor)),
                     ],
                   ).animate(delay: 600.ms).fadeIn(),
 
@@ -197,12 +200,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   // Google Sign In
                   OutlinedButton.icon(
                     onPressed: _isLoading ? null : _signInWithGoogle,
-                    icon: const Icon(Icons.g_mobiledata_rounded,
-                        size: 28, color: AppColors.textPrimary),
-                    label: const Text('Continue with Google'),
+                    icon: Icon(Icons.g_mobiledata_rounded,
+                        size: 28, color: theme.colorScheme.onSurface),
+                    label: Text(l10n.continueWithGoogle),
                     style: OutlinedButton.styleFrom(
                       minimumSize: const Size(double.infinity, 52),
-                      side: const BorderSide(color: AppColors.divider),
+                      side: BorderSide(color: theme.dividerColor),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -221,12 +224,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         GestureDetector(
                           onTap: () => context.push('/login/signup'),
                           child: Text(
-                            'Sign Up',
+                            l10n.signUp,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
                                 ?.copyWith(
-                                  color: AppColors.primary,
+                                  color: theme.colorScheme.primary,
                                   fontWeight: FontWeight.w600,
                                 ),
                           ),

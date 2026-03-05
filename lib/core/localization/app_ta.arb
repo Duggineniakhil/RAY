@@ -49,5 +49,7 @@
   "caption": "தலைப்பு",
   "selectCategory": "வகையை தேர்வு செய்யவும்",
   "upload": "பதிவேற்று",
-  "uploading": "பதிவேற்றுகிறது..."
+  "uploading": "பதிவேற்றுகிறது...",
+  "termsOfService": "சேவை விதிமுறைகள்",
+  "privacyPolicy": "தனியுரிமைக் கொள்கை"
 }

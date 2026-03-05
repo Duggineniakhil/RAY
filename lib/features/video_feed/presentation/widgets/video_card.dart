@@ -141,6 +141,7 @@ class _VideoCardState extends ConsumerState<VideoCard>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: _togglePlay,
       onDoubleTap: _onDoubleTap,
@@ -159,12 +160,11 @@ class _VideoCardState extends ConsumerState<VideoCard>
               ),
             )
           else
-            // Thumbnail / Loading placeholder
             Container(
-              color: AppColors.surface,
-              child: const Center(
+              color: theme.colorScheme.surface,
+              child: Center(
                 child: CircularProgressIndicator(
-                    color: AppColors.primary, strokeWidth: 2),
+                    color: theme.colorScheme.primary, strokeWidth: 2),
               ),
             ),
 
@@ -272,8 +272,8 @@ class _VideoCardState extends ConsumerState<VideoCard>
               child: VideoProgressIndicator(
                 _controller!,
                 allowScrubbing: true,
-                colors: const VideoProgressColors(
-                  playedColor: AppColors.primary,
+                colors: VideoProgressColors(
+                  playedColor: theme.colorScheme.primary,
                   bufferedColor: Colors.white30,
                   backgroundColor: Colors.white10,
                 ),

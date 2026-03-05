@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reelify/core/constants/app_constants.dart';
 import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/domain/models/user_model.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
@@ -25,6 +26,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   bool _isFollowing = false;
   UserModel? _profileUser;
   bool _isLoading = true;
+  int _totalLikes = 0;
+  int _videoCount = 0;
 
   @override
   void initState() {
@@ -57,14 +60,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       isFollowing = followDoc.exists;
     }
 
+    // Load video count and total likes
+    int totalLikes = 0;
+    int videoCount = 0;
+    try {
+      final videosSnap = await FirebaseFirestore.instance
+          .collection('videos')
+          .where('creatorId', isEqualTo: widget.userId)
+          .get();
+      videoCount = videosSnap.docs.length;
+      for (final vDoc in videosSnap.docs) {
+        totalLikes += (vDoc.data()['likes'] as int?) ?? 0;
+      }
+    } catch (_) {}
+
     if (doc.exists && mounted) {
       setState(() {
         _profileUser = UserModel.fromFirestore(doc);
         _isFollowing = isFollowing;
+        _totalLikes = totalLikes;
+        _videoCount = videoCount;
         _isLoading = false;
       });
     } else {
-      if(mounted) setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -122,26 +141,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   Widget build(BuildContext context) {
     final currentUser = ref.watch(authStateProvider).valueOrNull;
     final isOwnProfile = currentUser?.id == widget.userId;
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     if (_isLoading) {
-      return const Scaffold(
+      return Scaffold(
         body: Center(
-            child: CircularProgressIndicator(color: AppColors.primary)),
+            child: CircularProgressIndicator(color: theme.colorScheme.primary)),
       );
     }
+
+    final isPrivateAndNotFollowing = (_profileUser?.isPrivate ?? false) && !_isFollowing && !isOwnProfile;
 
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (context, _) => [
           SliverAppBar(
-            backgroundColor: AppColors.background,
+            backgroundColor: theme.scaffoldBackgroundColor,
             expandedHeight: 0,
             pinned: true,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
               onPressed: () => context.pop(),
             ),
-            title: Text(_profileUser?.username ?? 'Profile'),
+            title: Text(_profileUser?.username ?? l10n.profile),
             actions: [
               if (isOwnProfile)
                 IconButton(
@@ -151,36 +174,62 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             ],
           ),
           SliverToBoxAdapter(
-            child: _buildProfileHeader(isOwnProfile),
+            child: _buildProfileHeader(isOwnProfile, theme, l10n),
           ),
-          SliverPersistentHeader(
-            pinned: true,
-            delegate: _TabBarDelegate(
-              TabBar(
-                controller: _tabController,
-                indicatorColor: AppColors.primary,
-                labelColor: AppColors.textPrimary,
-                unselectedLabelColor: AppColors.textSecondary,
-                tabs: const [
-                  Tab(icon: Icon(Icons.grid_on_rounded)),
-                  Tab(icon: Icon(Icons.favorite_border_rounded)),
-                ],
+          if (!isPrivateAndNotFollowing)
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _TabBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  indicatorColor: theme.colorScheme.primary,
+                  labelColor: theme.colorScheme.onSurface,
+                  unselectedLabelColor: theme.hintColor,
+                  tabs: const [
+                    Tab(icon: Icon(Icons.grid_on_rounded)),
+                    Tab(icon: Icon(Icons.favorite_border_rounded)),
+                  ],
+                ),
+                theme.scaffoldBackgroundColor,
               ),
             ),
-          ),
         ],
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            _VideoGrid(userId: widget.userId),
-            _VideoGrid(userId: widget.userId, likedOnly: true),
-          ],
-        ),
+        body: isPrivateAndNotFollowing
+            ? _buildPrivateAccountPlaceholder(theme, l10n)
+            : TabBarView(
+                controller: _tabController,
+                children: [
+                  _VideoGrid(userId: widget.userId),
+                  _VideoGrid(userId: widget.userId, likedOnly: true),
+                ],
+              ),
       ),
     );
   }
 
-  Widget _buildProfileHeader(bool isOwnProfile) {
+  Widget _buildPrivateAccountPlaceholder(ThemeData theme, AppLocalizations l10n) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.lock_outline_rounded, size: 64, color: theme.hintColor),
+          const SizedBox(height: 16),
+          Text(
+            'This Account is Private',
+            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Follow this account to see their videos and likes.',
+            style: theme.textTheme.bodyMedium,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProfileHeader(bool isOwnProfile, ThemeData theme, AppLocalizations l10n) {
     final user = _profileUser;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -209,8 +258,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           const SizedBox(height: 12),
 
           Text('@${user?.username ?? 'user'}',
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
               )),
@@ -219,8 +268,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             const SizedBox(height: 6),
             Text(user!.bio,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 13)),
+                style: TextStyle(
+                    color: theme.hintColor, fontSize: 13)),
           ],
 
           const SizedBox(height: 16),
@@ -230,12 +279,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _StatItem(
-                  count: user?.followingCount ?? 0, label: 'Following'),
-              const SizedBox(width: 32),
+                  count: user?.followingCount ?? 0, label: l10n.following),
+              const SizedBox(width: 24),
               _StatItem(
-                  count: user?.followersCount ?? 0, label: 'Followers'),
-              const SizedBox(width: 32),
-              const _StatItem(count: 0, label: 'Likes'),
+                  count: user?.followersCount ?? 0, label: l10n.followers),
+              const SizedBox(width: 24),
+              _StatItem(count: _totalLikes, label: l10n.likes),
+              const SizedBox(width: 24),
+              _StatItem(count: _videoCount, label: l10n.posts),
             ],
           ),
 
@@ -247,10 +298,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               onPressed: _toggleFollow,
               style: ElevatedButton.styleFrom(
                 backgroundColor:
-                    _isFollowing ? AppColors.surfaceVariant : AppColors.primary,
+                    _isFollowing ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.primary,
                 minimumSize: const Size(160, 42),
               ),
-              child: Text(_isFollowing ? 'Following' : 'Follow'),
+              child: Text(_isFollowing ? l10n.following : l10n.follow),
             )
           else
             OutlinedButton(
@@ -267,7 +318,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               style: OutlinedButton.styleFrom(
                 minimumSize: const Size(160, 42),
               ),
-              child: const Text('Edit Profile'),
+              child: Text(l10n.editProfile),
             ),
         ],
       ),
@@ -288,17 +339,18 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       children: [
         Text(_format(count),
-            style: const TextStyle(
-              color: AppColors.textPrimary,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
               fontWeight: FontWeight.bold,
               fontSize: 18,
             )),
         Text(label,
-            style: const TextStyle(
-                color: AppColors.textSecondary, fontSize: 12)),
+            style: TextStyle(
+                color: theme.hintColor, fontSize: 12)),
       ],
     );
   }
@@ -312,20 +364,21 @@ class _VideoGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final repo = ref.watch(videoRepositoryProvider);
+    final theme = Theme.of(context);
 
     return FutureBuilder<List<VideoModel>>(
       future: repo.getUserVideos(userId, likedOnly: likedOnly),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary));
+          return Center(
+              child: CircularProgressIndicator(color: theme.colorScheme.primary));
         }
         final videos = snapshot.data ?? [];
         if (videos.isEmpty) {
           return Center(
             child: Text(
               likedOnly ? 'No liked videos' : 'No videos posted yet',
-              style: const TextStyle(color: AppColors.textSecondary),
+              style: TextStyle(color: theme.hintColor),
             ),
           );
         }
@@ -339,12 +392,12 @@ class _VideoGrid extends ConsumerWidget {
           ),
           itemCount: videos.length,
           itemBuilder: (context, i) => Container(
-            color: AppColors.surface,
+            color: theme.colorScheme.surface,
             child: videos[i].thumbnail.isNotEmpty
                 ? Image.network(videos[i].thumbnail, fit: BoxFit.cover)
-                : const Center(
+                : Center(
                     child: Icon(Icons.play_circle_outline_rounded,
-                        color: AppColors.textSecondary, size: 32)),
+                        color: theme.hintColor, size: 32)),
           ),
         );
       },
@@ -354,12 +407,13 @@ class _VideoGrid extends ConsumerWidget {
 
 class _TabBarDelegate extends SliverPersistentHeaderDelegate {
   final TabBar tabBar;
-  _TabBarDelegate(this.tabBar);
+  final Color bgColor;
+  _TabBarDelegate(this.tabBar, this.bgColor);
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(color: AppColors.background, child: tabBar);
+    return Container(color: bgColor, child: tabBar);
   }
 
   @override

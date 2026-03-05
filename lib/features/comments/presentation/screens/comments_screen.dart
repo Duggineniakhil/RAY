@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:reelify/core/constants/app_constants.dart';
-import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:uuid/uuid.dart';
@@ -60,6 +60,8 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
       minChildSize: 0.5,
@@ -69,10 +71,10 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
         return Material(
           color: Colors.transparent,
           child: Container(
-            decoration: const BoxDecoration(
-              color: AppColors.surface,
+            decoration: BoxDecoration(
+              color: theme.scaffoldBackgroundColor,
               borderRadius:
-                  BorderRadius.vertical(top: Radius.circular(20)),
+                  const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Column(
               children: [
@@ -82,7 +84,7 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.divider,
+                    color: theme.dividerColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -93,26 +95,26 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
                       horizontal: 16, vertical: 8),
                   child: Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          'Comments',
+                          l10n.comments,
                           style: TextStyle(
-                            color: AppColors.textPrimary,
+                            color: theme.colorScheme.onSurface,
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded,
-                            color: AppColors.textSecondary),
+                        icon: Icon(Icons.close_rounded,
+                            color: theme.hintColor),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                     ],
                   ),
                 ),
 
-                const Divider(color: AppColors.divider, height: 1),
+                Divider(color: theme.dividerColor, height: 1),
 
                 // Comments list
                 Expanded(
@@ -125,9 +127,9 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
                     builder: (context, snapshot) {
                       if (snapshot.connectionState ==
                           ConnectionState.waiting) {
-                        return const Center(
+                        return Center(
                             child: CircularProgressIndicator(
-                                color: AppColors.primary));
+                                color: theme.colorScheme.primary));
                       }
                       
                       // Handle the "Index Building" error gracefully in UI
@@ -138,7 +140,7 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
                              child: Column(
                                mainAxisAlignment: MainAxisAlignment.center,
                                children: [
-                                 const Icon(Icons.warning_amber_rounded, size: 48, color: AppColors.primary),
+                                 Icon(Icons.warning_amber_rounded, size: 48, color: theme.colorScheme.primary),
                                  const SizedBox(height: 12),
                                  const Text('Database Index Building', style: TextStyle(fontWeight: FontWeight.bold)),
                                  const SizedBox(height: 8),
@@ -159,11 +161,11 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.chat_bubble_outline_rounded,
+                              Icon(Icons.chat_bubble_outline_rounded,
                                   size: 48,
-                                  color: AppColors.textSecondary),
+                                  color: theme.hintColor),
                               const SizedBox(height: 12),
-                              Text('No comments yet',
+                              Text('No comments yet', // Using hardcoded or simple string if localized keys are missing besides core ones
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodyMedium),
@@ -208,25 +210,26 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
                       8,
                       16,
                       MediaQuery.of(context).viewInsets.bottom > 0 ? MediaQuery.of(context).viewInsets.bottom + 12 : 12),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     border: Border(
-                        top: BorderSide(color: AppColors.divider)),
-                    color: AppColors.surface,
+                        top: BorderSide(color: theme.dividerColor)),
+                    color: theme.scaffoldBackgroundColor,
                   ),
                   child: Row(
                     children: [
                       Expanded(
                         child: TextField(
                           controller: _commentController,
-                          style: const TextStyle(
-                              color: AppColors.textPrimary),
+                          style: TextStyle(
+                              color: theme.colorScheme.onSurface),
                           maxLines: null,
                           decoration: InputDecoration(
-                            hintText: 'Add a comment...',
+                            hintText: l10n.addComment,
+                            hintStyle: TextStyle(color: theme.hintColor),
                             contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 10),
                             filled: true,
-                            fillColor: AppColors.surfaceVariant,
+                            fillColor: theme.colorScheme.surface,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(24),
                               borderSide: BorderSide.none,
@@ -239,10 +242,9 @@ class _CommentsScreenState extends ConsumerState<CommentsScreen> {
                         onTap: _submitComment,
                         child: Container(
                           padding: const EdgeInsets.all(10),
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                                colors: AppColors.primaryGradient),
+                            color: theme.colorScheme.primary,
                           ),
                           child: const Icon(Icons.send_rounded,
                               color: Colors.white, size: 20),
@@ -275,6 +277,7 @@ class _CommentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
@@ -282,7 +285,7 @@ class _CommentTile extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 18,
-            backgroundColor: AppColors.surfaceVariant,
+            backgroundColor: theme.colorScheme.surface,
             backgroundImage:
                 avatar.isNotEmpty ? NetworkImage(avatar) : null,
             child: avatar.isEmpty
@@ -298,26 +301,26 @@ class _CommentTile extends StatelessWidget {
                 Row(
                   children: [
                     Text('@$username',
-                        style: const TextStyle(
-                          color: AppColors.textPrimary,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface,
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         )),
                     const SizedBox(width: 8),
                     Text(timeAgo,
-                        style: const TextStyle(
-                            color: AppColors.textHint, fontSize: 11)),
+                        style: TextStyle(
+                            color: theme.hintColor, fontSize: 11)),
                   ],
                 ),
                 const SizedBox(height: 4),
                 Text(text,
-                    style: const TextStyle(
-                        color: AppColors.textSecondary, fontSize: 14)),
+                    style: TextStyle(
+                        color: theme.textTheme.bodyMedium?.color, fontSize: 14)),
               ],
             ),
           ),
-          const Icon(Icons.favorite_border_rounded,
-              color: AppColors.textHint, size: 18),
+          Icon(Icons.favorite_border_rounded,
+              color: theme.hintColor, size: 18),
         ],
       ),
     );

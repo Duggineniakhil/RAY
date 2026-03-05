@@ -49,5 +49,7 @@
   "caption": "శీర్షిక",
   "selectCategory": "వర్గం ఎంచుకోండి",
   "upload": "అప్‌లోడ్ చేయండి",
-  "uploading": "అప్‌లోడ్ అవుతోంది..."
+  "uploading": "అప్‌లోడ్ అవుతోంది...",
+  "termsOfService": "సేవా నిబంధనలు",
+  "privacyPolicy": "గోప్యత పాలసీ"
 }

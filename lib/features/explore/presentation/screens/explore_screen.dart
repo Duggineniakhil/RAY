@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
 import 'package:reelify/features/video_feed/presentation/providers/video_feed_provider.dart';
 import 'package:reelify/core/constants/app_constants.dart';
+import 'package:reelify/core/services/dummy_data_service.dart';
 
 class ExploreScreen extends ConsumerStatefulWidget {
-  const ExploreScreen({super.key});
+  final String? initialQuery;
+  const ExploreScreen({super.key, this.initialQuery});
 
   @override
   ConsumerState<ExploreScreen> createState() => _ExploreScreenState();
@@ -16,16 +18,42 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   String? _selectedCategory;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.initialQuery != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(videoFeedProvider.notifier).searchVideos(widget.initialQuery!);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.background,
-        title: const Text('Explore', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold)),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        title: Text(l10n.explore, style: TextStyle(color: theme.colorScheme.onSurface, fontWeight: FontWeight.bold)),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.search_rounded, color: AppColors.textPrimary),
+            icon: Icon(Icons.auto_fix_high_rounded, color: theme.colorScheme.primary),
+            tooltip: 'Seed Dummy Data',
+            onPressed: () async {
+              await DummyDataService.seedVideos();
+              ref.read(videoFeedProvider.notifier).refreshFeed();
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Dummy videos seeded!')),
+                );
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.search_rounded, color: theme.colorScheme.onSurface),
             onPressed: () => _showSearchBar(context),
           ),
         ],
@@ -48,13 +76,13 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                   child: ChoiceChip(
                     label: Text(category,
                         style: TextStyle(
-                          color: isSelected ? Colors.white : AppColors.textSecondary,
+                          color: isSelected ? theme.colorScheme.onPrimary : theme.textTheme.bodyMedium?.color,
                           fontSize: 12,
                         )),
                     selected: isSelected,
-                    selectedColor: AppColors.primary,
-                    backgroundColor: AppColors.surface,
-                    side: BorderSide(color: isSelected ? AppColors.primary : AppColors.divider),
+                    selectedColor: theme.colorScheme.primary,
+                    backgroundColor: theme.colorScheme.surface,
+                    side: BorderSide(color: isSelected ? theme.colorScheme.primary : theme.dividerColor),
                     onSelected: (_) {
                       setState(() {
                         _selectedCategory = isSelected ? null : category;
@@ -71,7 +99,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
             ),
           ),
 
-          const Divider(color: AppColors.divider, height: 1),
+          Divider(color: theme.dividerColor, height: 1),
 
           // Video grid
           Expanded(
@@ -98,9 +126,11 @@ class _ExploreVideoGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final feedState = ref.watch(videoFeedProvider);
     final videos = feedState.videos;
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     if (feedState.isLoading && videos.isEmpty) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+      return Center(child: CircularProgressIndicator(color: theme.colorScheme.primary));
     }
 
     if (videos.isEmpty) {
@@ -108,11 +138,11 @@ class _ExploreVideoGrid extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.video_library_outlined, color: AppColors.textSecondary, size: 64),
+            Icon(Icons.video_library_outlined, color: theme.hintColor, size: 64),
             const SizedBox(height: 12),
             Text(
-              selectedCategory != null ? 'No videos in $selectedCategory' : 'No videos yet',
-              style: const TextStyle(color: AppColors.textSecondary),
+              selectedCategory != null ? '${l10n.noVideosYet} In $selectedCategory' : l10n.noVideosYet,
+              style: TextStyle(color: theme.hintColor),
             ),
           ],
         ),
@@ -139,16 +169,17 @@ class _VideoGridTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Stack(
       fit: StackFit.expand,
       children: [
         video.thumbnail.isNotEmpty
             ? Image.network(video.thumbnail, fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: AppColors.surface))
+                errorBuilder: (_, __, ___) => Container(color: theme.colorScheme.surface))
             : Container(
-                color: AppColors.surface,
-                child: const Icon(Icons.play_circle_outline_rounded,
-                    color: AppColors.textSecondary, size: 32),
+                color: theme.colorScheme.surface,
+                child: Icon(Icons.play_circle_outline_rounded,
+                    color: theme.hintColor, size: 32),
               ),
         // View count overlay
         Positioned(
@@ -203,13 +234,14 @@ class _VideoSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildSuggestions(BuildContext context) {
+    final theme = Theme.of(context);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: AppConstants.videoCategories
           .where((c) => c.toLowerCase().contains(query.toLowerCase()))
           .map((c) => ListTile(
-                leading: const Icon(Icons.label_outline_rounded, color: AppColors.primary),
-                title: Text(c, style: const TextStyle(color: AppColors.textPrimary)),
+                leading: Icon(Icons.label_outline_rounded, color: theme.colorScheme.primary),
+                title: Text(c, style: TextStyle(color: theme.colorScheme.onSurface)),
                 onTap: () {
                   query = c;
                   showResults(context);
@@ -221,15 +253,17 @@ class _VideoSearchDelegate extends SearchDelegate<String> {
 
   @override
   ThemeData appBarTheme(BuildContext context) {
-    return Theme.of(context).copyWith(
-      inputDecorationTheme: const InputDecorationTheme(
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+    return theme.copyWith(
+      inputDecorationTheme: InputDecorationTheme(
         border: InputBorder.none,
-        hintStyle: TextStyle(color: AppColors.textSecondary),
+        hintStyle: TextStyle(color: theme.hintColor),
       ),
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(color: AppColors.textPrimary),
+      textTheme: theme.textTheme.copyWith(
+        titleLarge: TextStyle(color: theme.colorScheme.onSurface),
       ),
-      scaffoldBackgroundColor: AppColors.background,
+      scaffoldBackgroundColor: theme.scaffoldBackgroundColor,
     );
   }
 }

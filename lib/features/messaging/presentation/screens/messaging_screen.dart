@@ -36,7 +36,7 @@ class MessagingScreen extends StatelessWidget {
             .snapshots(),
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+            return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary));
           }
 
           final docs = snap.data?.docs ?? [];
@@ -73,11 +73,11 @@ class MessagingScreen extends StatelessWidget {
                     leading: CircleAvatar(
                       radius: 26,
                       backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
-                      backgroundColor: AppColors.primary.withOpacity(0.2),
+                      backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                       child: avatar.isEmpty
                           ? Text(name.isNotEmpty ? name[0].toUpperCase() : '?',
-                              style: const TextStyle(
-                                  color: AppColors.primary, fontWeight: FontWeight.bold))
+                              style: TextStyle(
+                                  color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold))
                           : null,
                     ),
                     title: Text(name,
@@ -105,7 +105,7 @@ class MessagingScreen extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 11,
                               color: unreadCount > 0
-                                  ? AppColors.primary
+                                  ? Theme.of(context).colorScheme.primary
                                   : Theme.of(context).textTheme.bodySmall?.color,
                             ),
                           ),
@@ -113,8 +113,8 @@ class MessagingScreen extends StatelessWidget {
                           const SizedBox(height: 4),
                           Container(
                             padding: const EdgeInsets.all(5),
-                            decoration: const BoxDecoration(
-                              color: AppColors.primary,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
                               shape: BoxShape.circle,
                             ),
                             child: Text(
@@ -170,11 +170,11 @@ class _EmptyInbox extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.chat_bubble_outline_rounded,
-                size: 56, color: AppColors.primary),
+            child: Icon(Icons.chat_bubble_outline_rounded,
+                size: 56, color: Theme.of(context).colorScheme.primary),
           ),
           const SizedBox(height: 16),
           Text('No messages yet',
@@ -291,7 +291,7 @@ class _NewMessageSheetState extends State<_NewMessageSheet> {
           ),
           const SizedBox(height: 8),
           if (_loading)
-            const LinearProgressIndicator(color: AppColors.primary),
+            LinearProgressIndicator(color: Theme.of(context).colorScheme.primary),
           Expanded(
             child: ListView.builder(
               controller: scrollCtrl,
@@ -303,10 +303,10 @@ class _NewMessageSheetState extends State<_NewMessageSheet> {
                 return ListTile(
                   leading: CircleAvatar(
                     backgroundImage: avatar.isNotEmpty ? NetworkImage(avatar) : null,
-                    backgroundColor: AppColors.primary.withOpacity(0.2),
+                    backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                     child: avatar.isEmpty
                         ? Text(name[0].toUpperCase(),
-                            style: const TextStyle(color: AppColors.primary))
+                            style: TextStyle(color: Theme.of(context).colorScheme.primary))
                         : null,
                   ),
                   title: Text(name),
@@ -444,7 +444,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   .snapshots(),
               builder: (ctx, snap) {
                 if (snap.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+                  return Center(child: CircularProgressIndicator(color: Theme.of(context).colorScheme.primary));
                 }
                 final docs = snap.data?.docs ?? [];
                 return ListView.builder(
@@ -465,7 +465,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
                         decoration: BoxDecoration(
                           color: isMe
-                              ? AppColors.primary
+                              ? Theme.of(context).colorScheme.primary
                               : Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.only(
                             topLeft: const Radius.circular(18),
@@ -535,7 +535,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 IconButton(
                   onPressed: _send,
                   icon: const Icon(Icons.send_rounded),
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                   iconSize: 26,
                 ),
               ],

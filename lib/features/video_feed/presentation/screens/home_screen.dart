@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/features/video_feed/presentation/providers/video_feed_provider.dart';
 import 'package:reelify/features/video_feed/presentation/widgets/video_card.dart';
@@ -81,9 +81,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final feedState = ref.watch(videoFeedProvider);
     final user = ref.watch(authStateProvider).valueOrNull;
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: theme.scaffoldBackgroundColor,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -96,16 +98,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildTabButton('Following', false, feedState.isForYouFeed),
+            _buildTabButton(l10n.following, false, feedState.isForYouFeed),
             const SizedBox(width: 24),
-            _buildTabButton('For You', true, feedState.isForYouFeed),
+            _buildTabButton(l10n.forYou, true, feedState.isForYouFeed),
           ],
         ),
         actions: [
           IconButton(
             icon: const Icon(Icons.mic_rounded, color: Colors.white),
             onPressed: _startVoiceSearch,
-            tooltip: 'Voice Search',
+            tooltip: l10n.voiceSearch,
           ),
         ],
       ),
@@ -113,27 +115,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           // Main feed body
           feedState.videos.isEmpty && feedState.isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary))
+              ? Center(
+                  child: CircularProgressIndicator(color: theme.colorScheme.primary))
               : feedState.videos.isEmpty
                   ? _isOffline
-                      ? _buildOfflineFallback()
+                      ? _buildOfflineFallback(theme, l10n)
                       : Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.video_library_outlined,
-                                  color: AppColors.textSecondary, size: 64),
+                              Icon(Icons.video_library_outlined,
+                                  color: theme.hintColor, size: 64),
                               const SizedBox(height: 16),
                               Text(
-                                'No videos yet',
-                                style: Theme.of(context).textTheme.titleMedium,
+                                l10n.noVideosYet,
+                                style: theme.textTheme.titleMedium,
                               ),
                               const SizedBox(height: 8),
                               TextButton(
                                 onPressed: () =>
                                     ref.read(videoFeedProvider.notifier).refreshFeed(),
-                                child: const Text('Refresh'),
+                                child: Text(l10n.refresh),
                               ),
                             ],
                           ),
@@ -147,9 +149,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       : feedState.videos.length,
                   itemBuilder: (context, index) {
                     if (index >= feedState.videos.length) {
-                      return const Center(
+                      return Center(
                         child: CircularProgressIndicator(
-                            color: AppColors.primary),
+                            color: theme.colorScheme.primary),
                       );
                     }
                     return VideoCard(
@@ -181,13 +183,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   color: Colors.orange.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.wifi_off_rounded, size: 14, color: Colors.white),
-                    SizedBox(width: 6),
-                    Text('No internet — showing cached content',
-                        style: TextStyle(color: Colors.white, fontSize: 11)),
+                    const Icon(Icons.wifi_off_rounded, size: 14, color: Colors.white),
+                    const SizedBox(width: 6),
+                    Text(l10n.noInternet,
+                        style: const TextStyle(color: Colors.white, fontSize: 11)),
                   ],
                 ),
               ),
@@ -219,24 +221,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildOfflineFallback() {
+  Widget _buildOfflineFallback(ThemeData theme, AppLocalizations l10n) {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: SqliteService.instance.getCachedVideos(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator(color: AppColors.primary));
+          return Center(child: CircularProgressIndicator(color: theme.colorScheme.primary));
         }
         final cached = snapshot.data ?? [];
         if (cached.isEmpty) {
-          return const Center(
+          return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.wifi_off_rounded, color: AppColors.textSecondary, size: 64),
-                SizedBox(height: 12),
-                Text('No internet connection', style: TextStyle(color: AppColors.textPrimary)),
-                SizedBox(height: 4),
-                Text('Cached videos will appear here', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                Icon(Icons.wifi_off_rounded, color: theme.hintColor, size: 64),
+                const SizedBox(height: 12),
+                Text(l10n.noInternet, style: TextStyle(color: theme.colorScheme.onSurface)),
               ],
             ),
           );
@@ -251,11 +251,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           itemCount: cached.length,
           itemBuilder: (context, i) => Container(
-            color: AppColors.surface,
+            color: theme.colorScheme.surface,
             child: cached[i]['thumbnail'] != null && (cached[i]['thumbnail'] as String).isNotEmpty
                 ? Image.network(cached[i]['thumbnail'], fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.play_circle_outline_rounded, color: AppColors.textSecondary))
-                : const Icon(Icons.play_circle_outline_rounded, color: AppColors.textSecondary),
+                    errorBuilder: (_, __, ___) => Icon(Icons.play_circle_outline_rounded, color: theme.hintColor))
+                : Icon(Icons.play_circle_outline_rounded, color: theme.hintColor),
           ),
         );
       },

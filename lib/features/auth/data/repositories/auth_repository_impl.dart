@@ -111,7 +111,7 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> updateProfile({String? displayName, String? photoUrl, String? bio, String? username}) async {
+  Future<void> updateProfile({String? displayName, String? photoUrl, String? bio, String? username, bool? isPrivate}) async {
     final user = _firebaseAuth.currentUser;
     if (user == null) return;
     if (displayName != null) await user.updateDisplayName(displayName);
@@ -124,6 +124,7 @@ class AuthRepositoryImpl implements AuthRepository {
       if (photoUrl != null) 'profileImage': photoUrl,
       if (bio != null) 'bio': bio,
       if (username != null) 'username': username,
+      if (isPrivate != null) 'isPrivate': isPrivate,
     });
   }
 

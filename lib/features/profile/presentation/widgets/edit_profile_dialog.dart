@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/domain/models/user_model.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 
@@ -61,30 +61,33 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
     return AlertDialog(
-      backgroundColor: AppColors.surface,
-      title: const Text('Edit Profile', style: TextStyle(color: AppColors.textPrimary)),
+      backgroundColor: theme.colorScheme.surface,
+      title: Text(l10n.editProfile, style: TextStyle(color: theme.colorScheme.onSurface)),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
             controller: _nameController,
-            style: const TextStyle(color: AppColors.textPrimary),
-            decoration: const InputDecoration(
-              labelText: 'Display Name',
-              labelStyle: TextStyle(color: AppColors.textSecondary),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.divider)),
+            style: TextStyle(color: theme.colorScheme.onSurface),
+            decoration: InputDecoration(
+              labelText: l10n.displayName,
+              labelStyle: TextStyle(color: theme.hintColor),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: theme.dividerColor)),
             ),
           ),
           const SizedBox(height: 16),
           TextField(
             controller: _bioController,
-            style: const TextStyle(color: AppColors.textPrimary),
+            style: TextStyle(color: theme.colorScheme.onSurface),
             maxLength: 100,
-            decoration: const InputDecoration(
-              labelText: 'Bio',
-              labelStyle: TextStyle(color: AppColors.textSecondary),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.divider)),
+            decoration: InputDecoration(
+              labelText: l10n.bio,
+              labelStyle: TextStyle(color: theme.hintColor),
+              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: theme.dividerColor)),
             ),
           ),
         ],
@@ -92,13 +95,13 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.pop(context, false),
-          child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          child: Text(l10n.cancel, style: TextStyle(color: theme.hintColor)),
         ),
         TextButton(
           onPressed: _isLoading ? null : _save,
           child: _isLoading
-              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary))
-              : const Text('Save', style: TextStyle(color: AppColors.primary)),
+              ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary))
+              : Text(l10n.save, style: TextStyle(color: theme.colorScheme.primary)),
         ),
       ],
     );

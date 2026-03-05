@@ -157,4 +157,10 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get uploading => 'అప్‌లోడ్ అవుతోంది...';
+
+  @override
+  String get termsOfService => 'సేవా నిబంధనలు';
+
+  @override
+  String get privacyPolicy => 'గోప్యత పాలసీ';
 }

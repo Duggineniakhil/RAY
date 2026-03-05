@@ -42,7 +42,7 @@ class ActionButtons extends StatelessWidget {
                           image: NetworkImage(video.creatorAvatar),
                           fit: BoxFit.cover,
                         ),
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 child: video.creatorAvatar.isEmpty
                     ? const Icon(Icons.person_rounded,
@@ -57,7 +57,7 @@ class ActionButtons extends StatelessWidget {
                   height: 24,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.primary,
+                    color: Theme.of(context).colorScheme.primary,
                     border: Border.all(color: Colors.black, width: 1.5),
                   ),
                   child: const Icon(Icons.add_rounded,
@@ -75,7 +75,7 @@ class ActionButtons extends StatelessWidget {
           icon: video.isLikedByCurrentUser
               ? Icons.favorite_rounded
               : Icons.favorite_border_rounded,
-          color: video.isLikedByCurrentUser ? AppColors.like : Colors.white,
+          color: video.isLikedByCurrentUser ? const Color(0xFFFF2D55) : Colors.white,
           count: video.likes,
           onTap: () {
             HapticFeedback.lightImpact();

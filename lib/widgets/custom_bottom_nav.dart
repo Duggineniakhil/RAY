@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:reelify/core/theme/app_theme.dart';
+import 'package:reelify/generated/app_localizations.dart';
 
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -13,10 +14,13 @@ class CustomBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: const Border(top: BorderSide(color: AppColors.divider)),
+        color: theme.colorScheme.surface,
+        border: Border(top: BorderSide(color: theme.dividerColor)),
       ),
       child: SafeArea(
         top: false,
@@ -27,14 +31,14 @@ class CustomBottomNav extends StatelessWidget {
             children: [
               _NavItem(
                 icon: Icons.home_filled,
-                label: 'Home',
+                label: l10n.home,
                 isActive: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
               _NavItem(
                 icon: Icons.explore_outlined,
                 activeIcon: Icons.explore_rounded,
-                label: 'Explore',
+                label: l10n.explore,
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
@@ -51,7 +55,7 @@ class CustomBottomNav extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
+                        color: theme.colorScheme.primary.withOpacity(0.4),
                         blurRadius: 8,
                         spreadRadius: 0,
                       ),
@@ -64,14 +68,14 @@ class CustomBottomNav extends StatelessWidget {
               _NavItem(
                 icon: Icons.chat_bubble_outline_rounded,
                 activeIcon: Icons.chat_bubble_rounded,
-                label: 'Inbox',
+                label: l10n.inbox,
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
               ),
               _NavItem(
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
-                label: 'Profile',
+                label: l10n.profile,
                 isActive: currentIndex == 4,
                 onTap: () => onTap(4),
               ),
@@ -100,6 +104,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
@@ -113,7 +119,7 @@ class _NavItem extends StatelessWidget {
               child: Icon(
                 isActive ? (activeIcon ?? icon) : icon,
                 key: ValueKey(isActive),
-                color: isActive ? AppColors.primary : AppColors.textSecondary,
+                color: isActive ? theme.colorScheme.primary : theme.hintColor,
                 size: 26,
               ),
             ),
@@ -121,7 +127,7 @@ class _NavItem extends StatelessWidget {
             Text(
               label,
               style: TextStyle(
-                color: isActive ? AppColors.primary : AppColors.textSecondary,
+                color: isActive ? theme.colorScheme.primary : theme.hintColor,
                 fontSize: 10,
                 fontWeight:
                     isActive ? FontWeight.w600 : FontWeight.normal,

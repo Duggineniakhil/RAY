@@ -157,4 +157,10 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get uploading => 'अपलोड हो रहा है...';
+
+  @override
+  String get termsOfService => 'सेवा की शर्तें';
+
+  @override
+  String get privacyPolicy => 'गोपनीयता नीति';
 }

@@ -14,5 +14,5 @@ abstract class AuthRepository {
   Future<UserModel> signInWithGoogle();
   Future<void> signOut();
   Future<UserModel?> getCurrentUser();
-  Future<void> updateProfile({String? displayName, String? photoUrl, String? bio, String? username});
+  Future<void> updateProfile({String? displayName, String? photoUrl, String? bio, String? username, bool? isPrivate});
 }

@@ -1,4 +1,6 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
 
 class VideoInfoOverlay extends StatelessWidget {
@@ -65,15 +67,25 @@ class VideoInfoOverlay extends StatelessWidget {
 
         // Hashtags
         if (video.hashtags.isNotEmpty)
-          Text(
-            video.hashtags.map((h) => '#$h').join(' '),
+          RichText(
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Color(0xFF80DFFF),
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              shadows: [Shadow(blurRadius: 4, color: Colors.black87)],
+            text: TextSpan(
+              children: video.hashtags.map((h) {
+                return TextSpan(
+                  text: '#$h ',
+                  style: const TextStyle(
+                    color: Color(0xFF80DFFF),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    shadows: [Shadow(blurRadius: 4, color: Colors.black87)],
+                  ),
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      context.push('/home/explore?query=$h');
+                    },
+                );
+              }).toList(),
             ),
           ),
 

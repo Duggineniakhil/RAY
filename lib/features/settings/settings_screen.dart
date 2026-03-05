@@ -43,10 +43,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ListTile(
               leading: CircleAvatar(
                 radius: 22,
-                backgroundColor: AppColors.primary.withOpacity(0.2),
+                backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                 backgroundImage: user.profileImage.isNotEmpty ? NetworkImage(user.profileImage) : null,
                 child: user.profileImage.isEmpty
-                    ? const Icon(Icons.person_rounded, color: AppColors.primary)
+                    ? Icon(Icons.person_rounded, color: Theme.of(context).colorScheme.primary)
                     : null,
               ),
               title: Text(user.displayName,
@@ -93,19 +93,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
           // ── Notifications ─────────────────────────────────
           _SectionHeader(l10n.notifications),
-          _SettingsTile(
-            icon: Icons.notifications_outlined,
-            iconColor: Colors.orange,
-            title: l10n.notifications,
-            subtitle: 'Manage alerts and reminders',
-            onTap: () => _showComingSoonDialog(context, l10n.notifications),
-          ),
-          _SettingsTile(
+          _buildSwitchTile(
+            context,
             icon: Icons.lock_outline_rounded,
             iconColor: Colors.purple,
             title: l10n.privacy,
-            subtitle: 'Account visibility & data',
-            onTap: () => _showComingSoonDialog(context, l10n.privacy),
+            subtitle: 'Private Account',
+            value: user?.isPrivate ?? false,
+            onChanged: (val) async {
+              await ref.read(authRepositoryProvider).updateProfile(isPrivate: val);
+              // The authStateProvider should automatically refresh because of the stream
+            },
           ),
 
           // ── AI & Feed ─────────────────────────────────────
@@ -113,7 +111,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           _buildSwitchTile(
             context,
             icon: Icons.auto_awesome_rounded,
-            iconColor: AppColors.primary,
+            iconColor: Theme.of(context).colorScheme.primary,
             title: l10n.aiRecommendations,
             subtitle: 'Personalized "For You" feed',
             value: _aiEnabled,
@@ -136,10 +134,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             subtitle: AppConstants.appVersion,
           ),
           _SettingsTile(
-            icon: Icons.shield_outlined,
+            icon: Icons.description_outlined,
             iconColor: Colors.green,
-            title: 'Terms & Privacy',
-            onTap: () => _showComingSoonDialog(context, 'Terms & Privacy'),
+            title: l10n.termsOfService,
+            onTap: () => context.push('/home/settings/terms'),
+          ),
+          _SettingsTile(
+            icon: Icons.privacy_tip_outlined,
+            iconColor: Colors.teal,
+            title: l10n.privacyPolicy,
+            onTap: () => context.push('/home/settings/privacy'),
           ),
 
           const SizedBox(height: 16),
@@ -148,11 +152,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: OutlinedButton.icon(
-              icon: const Icon(Icons.logout_rounded, color: AppColors.primary),
+              icon: Icon(Icons.logout_rounded, color: Theme.of(context).colorScheme.primary),
               label: Text(l10n.signOut,
-                  style: const TextStyle(color: AppColors.primary)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.primary)),
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: AppColors.primary),
+                side: BorderSide(color: Theme.of(context).colorScheme.primary),
                 minimumSize: const Size(double.infinity, 48),
               ),
               onPressed: () async {
@@ -192,7 +196,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           : null,
       trailing: Switch(
         value: value,
-        activeColor: AppColors.primary,
+        activeColor: Theme.of(context).colorScheme.primary,
         onChanged: onChanged,
       ),
     );
@@ -213,7 +217,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 style: const TextStyle(fontSize: 24),
               ),
               title: Text(entry.value.split(' ').skip(1).join(' ')),
-              trailing: isSelected ? const Icon(Icons.check_circle_rounded, color: AppColors.primary) : null,
+              trailing: isSelected ? Icon(Icons.check_circle_rounded, color: Theme.of(context).colorScheme.primary) : null,
               onTap: () {
                 ref.read(localeProvider.notifier).setLocale(entry.key);
                 Navigator.pop(ctx);
@@ -283,7 +287,7 @@ class _SectionHeader extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w700,
           letterSpacing: 1.2,
-          color: AppColors.primary.withOpacity(0.8),
+          color: Theme.of(context).colorScheme.primary.withOpacity(0.8),
         ),
       ),
     );
