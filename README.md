@@ -90,11 +90,6 @@ flutter pub get
 # Generate code (Riverpod/Labels)
 dart run build_runner build --delete-conflicting-outputs
 ```
-
-### 3. Dummy Data Seeding
-To quickly populate your environment for testing:
-Call `DummyDataService.seedAll(FirebaseFirestore.instance)` in your `main()` method to automatically generate users, videos, and comments.
-
 ---
 
 ## 📜 Detailed Documentation
