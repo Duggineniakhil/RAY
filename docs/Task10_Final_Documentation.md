@@ -52,6 +52,19 @@ cd ios && pod install && cd ..
 flutter build ios --release
 ```
 
+### Web Deployment (Vercel)
+The application is pre-configured for Vercel with automated routing via `vercel.json`.
+```bash
+# 1. Build the production bundle
+flutter build web
+
+# 2. Deploy the web directory
+cd build/web
+vercel
+```
+- **Live Link**: [https://reelify-nu.vercel.app](https://reelify-nu.vercel.app)
+
+
 ---
 
 ## ✅ 5. Final Handover Status

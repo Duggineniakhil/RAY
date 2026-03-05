@@ -3,9 +3,12 @@
 An AI-powered, immersive short-video entertainment platform built with **Flutter** and **Firebase**. RAY (Reelify) combines the high-velocity experience of TikTok with innovative AI Voice Assistant capabilities to create a modern, accessible, and high-performance social media ecosystem.
 
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
+![Live Demo](https://img.shields.io/badge/Live-Demo-red?link=https://reelify-nu.vercel.app)
 ![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue)
 ![Firebase](https://img.shields.io/badge/Firebase-Integrated-orange)
 ![AI](https://img.shields.io/badge/AI-Voice%20Navigation-purple)
+
+**Live Web App**: [https://reelify-nu.vercel.app](https://reelify-nu.vercel.app)
 
 ## 🌟 Key Features
 
@@ -90,6 +93,15 @@ flutter pub get
 # Generate code (Riverpod/Labels)
 dart run build_runner build --delete-conflicting-outputs
 ```
+
+### 3. Deployment (Web/Vercel)
+The app is optimized for Vercel deployment. To deploy your own instance:
+```bash
+flutter build web
+cd build/web
+vercel
+```
+The root `vercel.json` provides the necessary URL rewrite rules for Flutter's single-page-app routing.
 ---
 
 ## 📜 Detailed Documentation
