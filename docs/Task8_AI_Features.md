@@ -1,21 +1,32 @@
-# Task 8: AI Features Implementation
+# Task 8: AI Features & Implementation
 
-## 1. Feature Architecture
-The `VoiceAssistantService` and `VoiceNavigationOverlay` introduce highly advanced hands-free application operation utilizing the device's native AI speech transcription engines.
+## 🎙️ 1. The Voice Intelligence Module
+RAY's AI features are centered around the **Integrated Voice Assistant**, providing a hands-free navigation bridge for all users.
 
-## 2. NLP Pipeline
-The feature relies on continuous audio stream decoding executed asynchronously across the `speech_to_text` and `flutter_tts` frameworks.
+---
 
-- **Initialization:** At application launch, the microphone hardware status is validated, checking specifically for `Permission.microphone`.
-- **Transcribing:** `speech_to_text` opens an active listening session. Words spoken by the user are transcribed instantly into Strings in real-time. Action triggers upon detecting a silence gap.
-- **Intent Resolution:** Uses `FuzzyStringMatcher` and `RegExp` rulesets to translate natural phrasing (e.g., "Take me to my profile", "Go home", "Scroll up", "Search for travel") into rigid programmatic enum `ActionTypes`.
+## 🧩 2. Implementation Architecture
 
-## 3. Triggering State Changes
-Once an intent is mapped, the AI engine directly communicates with the root Riverpod providers or the global `AppRouter` context object.
+- **Engine 1 (STT)**: `speech_to_text` captures user audio buffers and transcribes them into real-time strings.
+- **Engine 2 (TTS)**: `flutter_tts` generates auditory feedback, acknowledging user commands to confirm the action loop.
+- **State Broker**: The `VoiceAssistantService` (Riverpod) manages the active listening state and word-matching logic.
 
-- **Scrolling:** The Voice Assistant locates the `PageController` controlling the active Video Feed and triggers `controller.nextPage()`, smoothly scrolling to the subsequent video without user touch.
-- **Like Dispatch:** If the "Like this video" intent triggers, the service synthetically executes the same Riverpod provider toggle function bound to the UI double-tap gesture.
-- **Searching:** Extracts the targeted keyword from the transcription stack (e.g. isolating "cats" from "search for cats") and actively passes the string as a path parameter into the GoRouter push operation for `/home/explore`.
+---
 
-## 4. Audio Feedback (TTS)
-To make the AI feel responsive rather than robotic, `flutter_tts` initiates conversational callbacks upon completing actions, dynamically confirming operations ("Okay, scrolling down", "Heading to your profile").
+## 🤖 3. Command Intent Mapping
+
+The AI uses a robust matching algorithm to map spoken phrases to system-level intents.
+
+| Recognized Keyword | System Action |
+| :--- | :--- |
+| *"Next"*, *"Swipe"* | `PageController.nextPage()` |
+| *"Profile"*, *"My Account"* | `GoRouter.push('/profile')` |
+| *"Like this"* | `VideoRepository.toggleLike()` |
+| *"Search for [X]"* | Navigates to Explore + filter apply. |
+
+---
+
+## 🛡️ 4. Safety & Error Handling
+- **Privacy**: The microphone is strictly **on-demand**. No ambient listening is performed when the AI modal is closed.
+- **Graceful Failure**: If speech isn't recognized, the TTS system verbalizes a friendly request for clarification rather than crashing the interface.
+- **Permissions**: Fully integrated with `permission_handler` to ensure the OS-level microphone access is granted by the user.

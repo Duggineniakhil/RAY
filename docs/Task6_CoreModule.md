@@ -1,18 +1,35 @@
 # Task 6: Core Module Implementation
 
-## 1. Authentication Module
-The authentication flow utilizes **Firebase Authentication** mapped with custom `UserModel` records in Firestore.
-- **Providers:** `authControllerProvider` manages sign-up, login, and logout routines. It listens to the global `authStateChanges` stream to instantly rebuild the router configuration (e.g., kicking unparalleled users back to the splash screen).
-- **Registration Flow:** Users provide an email, password, and username. The system creates a Firebase User, immediately followed by the creation of a complementary Firestore document initialized with 0 followers and 0 likes.
+## 🔐 1. Authentication Layer
+The RAY authentication ecosystem is built for speed and security via **Firebase Auth**.
 
-## 2. Video Feed Module
-The `VideoFeedScreen` is the flagship component of the application.
-- **UI Architecture:** Built utilizing a `PageView.builder` operating along the vertical axis, allowing infinite, staggered swiping between high-definition short videos.
-- **Player Logic:** Utilizes the `video_player` plugin wrapped optimally. Only the currently visible video holds an active playback buffer, while the adjacent nodes are paused or disposed of to save memory.
-- **Data Source:** Fed by the `FeedRepository.getFeedVideos()`, which asynchronously streams video documents based strictly on algorithmic engagement rules. 
+- **Implementation**: The `authControllerProvider` (Riverpod) acts as the bridge between the UI and the Firebase SDK.
+- **Workflow**:
+  1.  **Signup**: Concurrent creation of a Firebase User and a synchronized Firestore document.
+  2.  **State Observation**: A global `StreamProvider` watches `authStateChanges`, ensuring the app instantly reacts (redirects) to session events.
 
-## 3. Media Upload Module
-A comprehensive flow enabling content creators to publish their own videos to the platform.
-- **Camera Screen:** Integrates the device hardware camera, allowing custom framerates and aspect-ratio modifications. Includes dynamic filter overlays (`ColorFiltered` matrix logic).
-- **Trimmer Editor:** Incorporates the `video_trimmer` (v5.0.0) package completely natively without FFmpeg dependencies, letting users select start and end timestamps.
-- **Upload Pipeline:** Uploads the trimmed, compressed raw `mp4` file explicitly to an external CDN (Cloudinary) via raw HTTP multi-part requests, drastically saving Firebase Storage overhead. Only the resulting URL and metadata (hashtags, caption) are logged into Firestore.
+---
+
+## 📽️ 2. High-Performance Video Feed
+The flagship feature of RAY, optimized for **60 FPS** vertical swiping.
+
+- **Engine**: Custom implementation of `PageView.builder`.
+- **Optimization Strategy**:
+  - **Lazy Loading**: Only the visible and one adjacent video are buffered into memory.
+  - **Auto-Lifecycle**: Videos automatically `pause()` when swiped out of view and `dispose()` when their index is cleared from the builder's viewport, preventing memory leaks on low-end devices.
+
+---
+
+## ☁️ 3. Media Upload Pipeline
+A robust technical flow for publishing user-generated content.
+
+```mermaid
+graph LR
+    Camera[Camera/Picker] --> Editor[Trimmer/Filter]
+    Editor --> Cloudinary[Upload to Cloudinary CDN]
+    Cloudinary --> URL[Optimized Video URL]
+    URL --> Firestore[Save Metadata to Firestore]
+```
+
+- **Trimming Logic**: Uses the native `video_trimmer` (v5.0.0) package to provide a frame-accurate UI for clipping videos before they ever hit the network.
+- **Storage Strategy**: High-bitrate media is offloaded to Cloudinary to provide **Adaptive Bitrate Streaming** (HLS/Dash), while minimal metadata is stored in Firestore.

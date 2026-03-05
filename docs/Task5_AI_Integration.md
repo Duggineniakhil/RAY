@@ -1,29 +1,42 @@
-# Task 5: AI Integration Planning
+# Task 5: AI Integration Strategy
 
-## 1. Feature Purpose
-Given the fast-paced, highly-visual nature of a short video application, traditional touch navigation can sometimes be a friction point for accessibility. The goal of the AI Integration is to implement a **Voice-First Navigation Assistant**. This allows users to control the application ecosystem entirely hands-free.
+## 🧠 1. The Vision: Hands-Free Interaction
+RAY differentiates itself through an **AI-First Navigation Layer**. By utilizing advanced Speech-To-Text (STT) and Natural Language Understanding (NLU) patterns, we enable a truly hands-free video consumption experience.
 
-## 2. Core Technologies
-- `speech_to_text`: Flutter plugin for utilizing device-native speech recognition algorithms (Google Assistant/Siri engines) to transcribe user audio to text strings.
-- `flutter_tts`: Text-To-Speech engine to provide auditory feedback directly to the user to confirm AI actions.
-- `string_similarity`: For fuzzy matching voice commands to system intents.
+---
 
-## 3. System Architecture
-The AI layer operates as a globally accessible Riverpod `StateNotifier`. It actively listens via the microphone in a background thread while the overlay UI pulses to indicate active listening.
+## ⚙️ 2. The AI Pipeline
 
-**The pipeline:**
-1. **Trigger:** User taps the floating AI microphone button.
-2. **STT:** `speech_to_text` converts the spoken phrase into a transcript.
-3. **Intent Parsing:** A custom NLP matching algorithm identifies trigger keywords (e.g., "next", "scroll down", "search for cats", "go home").
-4. **Action Dispatch:** The AI state manager triggers `go_router` context pushes or `PageController` animations directly.
-5. **TTS (Optional):** The `flutter_tts` engine casually confirms the action (e.g., voicing "Scrolling down").
+```mermaid
+graph LR
+    UserSpeech((User Speech)) --> STT[STT Engine]
+    STT --> Transcript[Text Transcript]
+    Transcript --> NLU[Intent Matcher]
+    NLU --> Dispatcher[Action Dispatcher]
+    Dispatcher --> Navigation[App Navigation]
+    Dispatcher --> TTS[TTS Verbal Feedback]
+```
 
-## 4. Planned Command Handlers
-| Spoken Intent | Application Action |
-| ------------- | ------------------ |
-| "Next", "Scroll down" | Animates the main feed's PageController to `index + 1`. |
-| "Like this", "Heart it" | Triggers the like animation and updates Firestore repo. |
-| "Go to profile", "My account" | Executes `context.go('/home/profile')`. |
-| "Search for [X]" | Navigates to Explore screen and injects [X] into the query parameters. |
+---
 
-This AI Module fundamentally shifts the user UX from passive scrolling to interactive command-based browsing.
+## 🛠️ 3. Core Technologies
+1.  **Speech Transcription**: Powered by the native OS engines (Android/iOS) via `speech_to_text`.
+2.  **Logic Engine**: A dedicated `VoiceAssistantService` that performs "fuzzy matching" on transcripts.
+3.  **Auditory Feedback**: `flutter_tts` provides verbal confirmation (e.g. "Opening profile") to close the UX loop for non-visual users.
+
+---
+
+## 🗣️ 4. Supported Command Sets
+
+| Command Intent | Targeted App Action |
+| :--- | :--- |
+| **"Next Video"** | Advances the Feed PageController by one. |
+| **"Heart this"** | Triggers the like transaction on the current video. |
+| **"Search [Query]"** | Navigates to Explore and executes the search for [Query]. |
+| **"Go to Profile"** | Executes a context push to the user's dashboard. |
+
+---
+
+## 🛡️ 5. Privacy & Ethics
+- **On-Demand Only**: The microphone is only active when the visual AI trigger is engaged.
+- **Local Processing**: Transcriptions are processed on-device wherever possible to minimize latency and maximize user privacy.

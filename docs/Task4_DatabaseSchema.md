@@ -1,71 +1,65 @@
 # Task 4: Database Schema & ER Diagram
 
-## 1. Environment
-**Database:** Firebase Cloud Firestore (NoSQL)
-**File Storage:** Firebase Storage (Avatars) & Cloudinary (Optimized Video streaming)
+## 🗄️ 1. Database Infrastructure
+- **Core Storage**: Google Cloud Firestore (NoSQL).
+- **Media Optimization**: Cloudinary (CDN) for adaptive video delivery.
 
-## 2. Entity Relationship & Collections
+---
 
-The data model utilizes top-level collections optimized for rapid reading and pagination. Denormalization is applied where necessary for performance (e.g., caching counts).
+## 📊 2. Entity Relationship Model
 
-### A. `users` Collection
-Stores authentication profiles and social metadata.
-```json
-{
-  "id": "String (Document ID / UID)",
-  "username": "String",
-  "displayName": "String",
-  "email": "String",
-  "bio": "String",
-  "profileImage": "String (URL)",
-  "followersCount": "Integer",
-  "followingCount": "Integer",
-  "likesCount": "Integer",
-  "postsCount": "Integer",
-  "isPrivate": "Boolean",
-  "createdAt": "Timestamp"
-}
-```
-**Subcollections inside `users/{userId}`:**
-- `followers/`: Tracks reference documents of users following this account.
-- `following/`: Tracks reference documents of users this account follows.
+```mermaid
+erDiagram
+    USER ||--o{ VIDEO : creates
+    USER ||--o{ COMMENT : writes
+    VIDEO ||--o{ COMMENT : contains
+    USER ||--o{ USER : follows
 
-### B. `videos` Collection
-Stores detailed metadata and media references for the main feed.
-```json
-{
-  "id": "String (Document ID)",
-  "creatorId": "String (Foreign Key -> users.id)",
-  "creatorName": "String (Denormalized)",
-  "creatorAvatar": "String (Denormalized)",
-  "videoUrl": "String (Cloudinary URL)",
-  "thumbnail": "String (URL)",
-  "caption": "String",
-  "hashtags": "Array of Strings",
-  "category": "String",
-  "likes": "Integer",
-  "commentsCount": "Integer",
-  "shares": "Integer",
-  "filterIndex": "Integer",
-  "uploadTime": "Timestamp"
-}
+    USER {
+        string uid PK
+        string username
+        string profileImage
+        int followersCount
+        int followingCount
+        int postsCount
+    }
+
+    VIDEO {
+        string id PK
+        string creatorId FK
+        string videoUrl
+        string thumbnail
+        int likes
+        int commentsCount
+    }
+
+    COMMENT {
+        string id PK
+        string videoId FK
+        string userId FK
+        string text
+        timestamp timestamp
+    }
 ```
 
-### C. `comments` Collection
-A global collection for retrieving paginated text discussions tied to a specific video entity.
-```json
-{
-  "id": "String (Document ID)",
-  "videoId": "String (Foreign Key -> videos.id)",
-  "userId": "String",
-  "userName": "String",
-  "userAvatar": "String",
-  "text": "String",
-  "likes": "Integer",
-  "timestamp": "Timestamp"
-}
-```
+---
 
-## 3. Schema Design Rationale
-- **Denormalization:** `creatorName` and `creatorAvatar` are duplicated into the `videos` collection to prevent executing secondary Firestore read requests when rendering the high-velocity video feed.
-- **Top-Level Grouping:** Comments are stored in a root-level collection mapped by `videoId` instead of sub-collections to facilitate easier global moderation queries if needed.
+## 📝 3. Collection Specifications
+
+### `users` Collection
+Optimized for profile discovery and social tracking.
+- **Denormalization**: `followersCount` and `likesCount` are updated via transactions to avoid expensive count queries.
+
+### `videos` Collection
+The high-velocity data source for the main feed.
+- **Metadata**: Stores `uploadTime` for sorting and `filterIndex` to persist creator choices.
+- **Architecture**: Mapped to `VideoModel` via `fromFirestore` factories with safe-null handling.
+
+### `comments` Collection
+- **Mapping**: Each document carries a `videoId` field for direct indexing, allowing global comment retrieval without deep-nested subcollection overhead.
+
+---
+
+## 🛡️ 4. Data Protection & Integrity
+- **Security Rules**: Firestore rules ensure only authenticated owners can `update` their own metadata or `delete` their uploaded content.
+- **Performance**: Indexes configured for `uploadTime` and `creatorId` to support high-speed pagination in the Discover and Profile grids.

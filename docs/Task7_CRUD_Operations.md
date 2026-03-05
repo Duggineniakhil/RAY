@@ -1,22 +1,29 @@
-# Task 7: CRUD Operations with Firestore & Local DB
+# Task 7: CRUD Operations & Data Sync
 
-## 1. Create (C)
-- **Content Creation:** Uploading new videos creates a new document in the `videos` collection with metadata like `creatorId`, `uploadTime`, and initial engagement stats all set to zero.
-- **Interactions:** Posting comments to the global `comments` collection. Each comment maps its `videoId` as a foreign key. Following users creates a dual-record (adding to the followers subcollection of the target, and the following subcollection of the user).
+## ⚡ 1. The CRUD Ecosystem
 
-## 2. Read (R)
-- **Feeds:** Fetching paginated video arrays for the `Home` feed, `Explore` feed (filtered by tags/categories), and `Profile` video grids.
-- **Real-time Stats:** Utilizing `ProfileStatsService.syncStats()` on profile load to asynchronously read all instances of a user's videos and dynamically sum their cumulative `likesCount` and `postsCount` directly from the raw data.
-- **Comments:** Real-time stream subscription (`snapshots()`) to listen for incoming comments on a specific post.
+RAY utilizes Cloud Firestore's real-time capabilities to provide an "Always-Synced" experience.
 
-## 3. Update (U)
-- **Like Transactions:** Double-tapping a video executes a `FieldValue.increment(1)` transaction on the video's `likes` field.
-- **Profile Configuration:** The `EditProfileDialog` allows users to cleanly update their canonical `displayName`, `bio`, and `profileImage`. These updates are pushed to the main `users` document.
+| Op | Action | Technical Implementation |
+| :--- | :--- | :--- |
+| **C** | **Post Content** | Firestore `doc().set()` with `uploadTime` and Cloudinary URL references. |
+| **R** | **Live Feeds** | `Query.snapshots()` for comments; `get()` with pagination for the video feed. |
+| **U** | **Engagement** | Atomic `FieldValue.increment(1)` for likes and share counts. |
+| **D** | **Social Link** | WriteBatch `delete()` for removing follower/following relationship records. |
 
-## 4. Delete (D)
-- **Unfollowing:** Deleting the matching relational user reference documents from both subcollections simultaneously via a `WriteBatch` to keep counts consistent.
-- **Unlike/Content:** Reverting like interactions by submitting negative mathematical increments (`FieldValue.increment(-1)`).
+---
 
-## 5. Local Database Caching
-- **Thumbnail Cache Service:** Videos inherently produce heavy network loads. We intercept the network request for thumbnails, mapping the `Video URL` hash to local storage via the `path_provider` and `crypto` libraries. 
-- **Execution:** Future thumbnails are resolved entirely from local device disk I/O instead of hitting the internet, saving massive bandwidth and eliminating stutter during fast scrolling.
+## 🔄 2. Real-time Statistical Synchronization
+To avoid stale data, the app implements a **Dynamic Metric Sync** logic.
+
+- **Trigger**: Every profile load initiates `ProfileStatsService.syncStats()`.
+- **Logic**: The service queries the `videos` collection for the user's ID, sums the cumulative likes and post counts in real-time, and refreshes the user's master document. 
+- **Result**: Users see perfectly accurate counts even if a backend sync function has a delay.
+
+---
+
+## 💾 3. Performance Caching
+To minimize bandwidth and improve "Time to First Play":
+
+1.  **Thumbnail Caching**: A local service intercepts network requests, hashes the URL, and stores the image bytes in the device's temporal cache using `path_provider`.
+2.  **Persistence**: High-frequency data (like auth tokens) are cached via `shared_preferences` for instantaneous app launches.

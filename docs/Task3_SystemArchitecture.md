@@ -1,35 +1,45 @@
-# Task 3: System Architecture Setup
+# Task 3: System Architecture & State Management
 
-## 1. Architectural Pattern
-The RAY application follows a **Feature-First Clean Architecture**. This approach ensures separation of concerns, massive scalability, and modular independence. Instead of grouping files by type (e.g., all models together), files are grouped by the feature they belong to.
+## 🏛️ 1. Professional Architecture Pattern
+RAY strictly adheres to the **Feature-First Clean Architecture**. This approach ensures that features are independent, testable, and maintainable.
 
-### Directory Structure
-```text
-lib/
- ├── core/              # Global application definitions
- │   ├── constants/       # App-wide strings, theme constants
- │   ├── errors/          # Custom exception classes
- │   ├── services/       # 3rd party services (DummyData, ThumbnailCache)
- │   └── utils/          # AppRouter configuration, Camera filters
- ├── features/          # Independent application modules
- │   ├── auth/
- │   ├── explore/
- │   ├── profile/
- │   ├── upload_video/
- │   └── video_feed/
- ├── shared/            # Reusable UI components
- └── main.dart          # Entry point
+### 🧩 Layer Responsibilities
+
+```mermaid
+graph TD
+    UI[Presentation Layer: Screens & Widgets]
+    State[State Management Layer: Riverpod]
+    Domain[Domain Layer: Models & Entities]
+    Data[Data Layer: Repositories & DTOs]
+
+    UI --> State
+    State --> Data
+    Data --> Domain
+    Data --> External[Cloud Firestore / Cloudinary]
 ```
 
-## 2. Feature Layer Breakdown
-Each feature inside `lib/features/` is split into three core layers:
-1. **Data Layer (`/data`):** Contains the Repositories, handling direct backend communication (Firestore, Auth, Cloudinary APIs).
-2. **Domain Layer (`/domain`):** Contains the Data Models (e.g., `VideoModel`, `UserModel`) and business logic entities.
-3. **Presentation Layer (`/presentation`):** Contains the Screens, UI Widgets, and State Providers binding the UI to the Data layer.
+---
 
-## 3. State Management Configuration
-The application exclusively utilizes **Riverpod** (`flutter_riverpod` and `riverpod_annotation`).
+## 📁 2. Structural Breakdown
 
-- **Providers:** Used to inject global dependencies (e.g., `firebaseAuthProvider`, `firestoreProvider`).
-- **StateNotifier / AsyncNotifier:** Used to handle asynchronous UI states (Loading, Success, Error) for network calls. 
-- **ConsumerWidget:** Automatically rebuilding isolated UI components when specific data nodes change, ensuring smooth 60 FPS rendering without resorting to monolithic `setState` calls.
+- **`lib/features/`**: The heart of the app. Each folder (e.g., `video_feed`) contains its own `data`, `domain`, and `presentation` directories.
+- **`lib/core/`**: Shared infrastructure.
+  - `constants/`: Global strings, theme tokens, and collection names.
+  - `services/`: Singleton handles for system-level logic like `ThumbnailCacheService`.
+  - `utils/`: Reusable helpers like `AppRouter` and `CameraFilters`.
+
+---
+
+## ⚡ 3. State Management Logic
+We utilize the **Riverpod** ecosystem for a declarative, reactive UI.
+
+| Module | Type | Purpose |
+| :--- | :--- | :--- |
+| **Auth** | `StreamProvider` | Reactively updates UI on Firebase Auth state changes. |
+| **Feed** | `AsyncNotifier` | Manages pagination, loading states, and algorithmic sorting of videos. |
+| **Profile** | `StateProvider` | Tracks UI-local state like selected tabs and follow status. |
+
+### Key Performance Benefits
+- **Scoped Rebuilds**: Only the specific widget watching a provider rebuilds during state updates.
+- **Automatic Caching**: Riverpod handles object lifetimes, ensuring repositories aren't unnecessarily recreated.
+- **Compile-time Safety**: Leveraging `riverpod_generator` to eliminate common provider lookup errors.

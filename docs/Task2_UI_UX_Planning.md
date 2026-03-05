@@ -1,37 +1,53 @@
-# Task 2: UI/UX Planning – Wireframes & Navigation Flow
+# Task 2: UI/UX Planning & Navigation Flow
 
-## 1. Design Philosophy
-The user interface revolves around immersive, edge-to-edge media consumption. The app employs a dark-mode-first aesthetic with dynamic overlays, ensuring the video content remains the central focus. 
+## 🎨 Design Vision
+RAY leverages an **Immersive Dark Aesthetic**. By utilizing full-bleed video backgrounds and high-contrast overlays, the UI disappears to let the content lead.
 
-## 2. Core Navigation Flow
-The application uses a persistent Bottom Navigation Bar controlling the primary routes. Global routing and deep-linking are managed by the `go_router` package for robust state preservation.
+---
 
-### Route Hierarchy
-- `/splash` -> Application initialization and auth check.
-- `/login` & `/signup` -> Authentication flow.
-- `/home` (Bottom Navigation Shell)
-  - `/home/feed` -> The primary vertical scrolling video player.
-  - `/home/explore` -> Search and trending content grid.
-  - `/home/upload` -> Video/Image picker and camera module.
-  - `/home/profile` -> Current user's profile and analytics.
+## 🧭 1. Navigation Architecture
+We utilize a flattened navigation hierarchy to minimize tapping distance to core features.
 
-## 3. Screen Breakdowns
+```mermaid
+graph LR
+    Splash((Splash)) --> Auth{Auth?}
+    Auth -- No --> Login[Login/Signup]
+    Auth -- Yes --> Main[Main Shell]
+    
+    subgraph "Main Shell (Bottom Nav)"
+        Main --> Feed[Video Feed]
+        Main --> Explore[Explore Grid]
+        Main --> Upload[Camera/Upload]
+        Main --> Profile[User Profile]
+    end
 
-### Video Feed Screen
-- **Background:** Full-screen `VideoPlayer` widget.
-- **Right Overlay:** Floating interaction column (Profile Avatar, Like, Comment, Share).
-- **Bottom Overlay:** Video caption, hashtags, and scrolling music track marquee.
-- **Gestures:** Vertical drag to paginate, single-tap to play/pause, double-tap to trigger a Lottie heart animation.
+    Feed --> VideoDetail[Single Video View]
+    Explore --> Search[Live Search]
+    Profile --> Settings[App Settings]
+    Profile --> Edit[Edit Profile]
+```
 
-### Camera & Media Editor Screen
-- **Camera Screen:** Full-screen camera preview utilizing `camera` package. Includes torch toggle, flip camera, and filter scrolling wheel.
-- **Editor Screen:** Video timeline trimmer using `video_trimmer`, playback preview, and final confirmation before uploading to the BaaS (Cloudinary).
+---
 
-### Profile Screen
-- **Header:** Circular user avatar, Username, Bio, and localized follower/following statistics.
-- **Body:** Tabular views switching between a grid of `Uploaded` videos and `Liked` videos. 
+## 📱 2. Core Screen Specifications
 
-## 4. Micro-Animations & Interactivity
-- Utilizing `flutter_animate` for staggered fade-ins on grids.
-- Lottie animations for empty states, successful uploads, and the double-tap to like functionality.
-- Custom slide-up and slide-right page transitions via `CustomTransitionPage`.
+### 🎬 Immersive Video Feed
+- **Interaction Layer**: Transparent overlay featuring `Lottie` heart animations and a horizontally scrolling music marquee.
+- **Gestures**: 
+  - `DragVertical`: Page pagination.
+  - `Tap`: Toggle Play/Pause.
+  - `DoubleTap`: Instant Like interaction.
+
+### 📸 Content Studio
+- **Preview**: Real-time GPU-accelerated filter preview via `camera` package.
+- **Native Trimming**: Frame-accurate video extraction using native platform channels to avoid heavy FFmpeg overhead.
+
+### 👤 Profile Analytics
+- **Grid views**: Staggered dual-tabbed layout switching between 'Own Videos' and 'Saved/Liked' content.
+- **Micro-Animations**: Staggered entry animations for grid tiles using `flutter_animate`.
+
+---
+
+## 🛠️ 3. Navigation Implementation
+- **Router**: Managed by `GoRouter` for declarative routing.
+- **Transitions**: Seamless `SlideTransition` logic used for all secondary screen pushes to maintain a consistent "swiping" feel throughout the UX.
