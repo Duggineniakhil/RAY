@@ -35,8 +35,11 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       password: password,
     );
-    return await _getUserFromFirestore(credential.user!.uid) ??
-        _createDefaultUser(credential.user!);
+    final user = credential.user;
+    if (user == null) throw Exception('User not found after sign in.');
+    
+    return await _getUserFromFirestore(user.uid) ??
+        _createDefaultUser(user);
   }
 
   @override
@@ -49,9 +52,12 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       password: password,
     );
-    await credential.user!.updateDisplayName(username);
+    final firebaseUser = credential.user;
+    if (firebaseUser == null) throw Exception('User not found after account creation.');
+    
+    await firebaseUser.updateDisplayName(username);
     final user = UserModel(
-      id: credential.user!.uid,
+      id: firebaseUser.uid,
       email: email,
       username: username.toLowerCase().replaceAll(' ', '_'),
       displayName: username,
@@ -67,6 +73,11 @@ class AuthRepositoryImpl implements AuthRepository {
     if (googleUser == null) throw Exception('Google sign-in was cancelled');
 
     final googleAuth = await googleUser.authentication;
+    // Check if authentication details are unexpectedly null
+    // ignore: unnecessary_null_comparison
+    if (googleAuth == null) {
+       throw Exception('Failed to obtain Google authentication details.');
+    }
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -75,8 +86,12 @@ class AuthRepositoryImpl implements AuthRepository {
         await _firebaseAuth.signInWithCredential(credential);
     final firebaseUser = userCredential.user;
 
+    if (firebaseUser == null) {
+      throw Exception('Failed to obtain Firebase user after Google sign-in.');
+    }
+
     // Check if user already exists
-    final existing = await _getUserFromFirestore(firebaseUser!.uid);
+    final existing = await _getUserFromFirestore(firebaseUser.uid);
     if (existing != null) return existing;
 
     // Create new user
