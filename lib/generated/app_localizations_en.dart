@@ -163,4 +163,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get message => 'Message';
 }

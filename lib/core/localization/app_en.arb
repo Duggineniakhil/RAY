@@ -51,5 +51,6 @@
   "upload": "Upload",
   "uploading": "Uploading...",
   "termsOfService": "Terms of Service",
-  "privacyPolicy": "Privacy Policy"
+  "privacyPolicy": "Privacy Policy",
+  "message": "Message"
 }

@@ -73,7 +73,6 @@ class VideoRepositoryImpl implements VideoRepository {
       final snapshot = await _firestore
           .collection(AppConstants.videosCollection)
           .where('creatorId', whereIn: chunk)
-          .orderBy('uploadTime', descending: true)
           .get();
       followingVideos.addAll(snapshot.docs.map((doc) => VideoModel.fromFirestore(doc)));
     }

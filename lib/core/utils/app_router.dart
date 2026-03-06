@@ -20,6 +20,7 @@ import 'package:reelify/features/explore/presentation/screens/explore_screen.dar
 import 'package:reelify/features/messaging/presentation/screens/messaging_screen.dart';
 import 'package:reelify/features/video_feed/domain/models/video_model.dart';
 import 'package:reelify/features/video_feed/presentation/screens/single_video_screen.dart';
+import 'package:reelify/features/profile/presentation/screens/followers_list_screen.dart';
 
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -127,6 +128,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => ProfileScreen(
               userId: state.pathParameters['userId']!,
             ),
+            routes: [
+              GoRoute(
+                path: 'followers',
+                name: 'followers',
+                builder: (context, state) => FollowersListScreen(
+                  userId: state.pathParameters['userId']!,
+                  type: 'followers',
+                ),
+              ),
+              GoRoute(
+                path: 'following',
+                name: 'following',
+                builder: (context, state) => FollowersListScreen(
+                  userId: state.pathParameters['userId']!,
+                  type: 'following',
+                ),
+              ),
+            ],
           ),
           GoRoute(
             path: 'settings',

@@ -54,25 +54,36 @@ class _CameraScreenState extends State<CameraScreen> with SingleTickerProviderSt
     if (_cameras == null || _cameras!.isEmpty) return;
     
     final oldController = _cameraController;
-    _cameraController = CameraController(
+    if (oldController != null) {
+      // Must dispose old controller before initializing new one 
+      // otherwise some Android devices crash complaining about concurrent camera usage.
+      _cameraController = null;
+      await oldController.dispose();
+    }
+
+    final newController = CameraController(
       _cameras![_selectedCameraIndex],
       ResolutionPreset.high,
       enableAudio: true,
-      imageFormatGroup: ImageFormatGroup.jpeg,
     );
 
     try {
-      await _cameraController!.initialize();
-      await _cameraController!.setFlashMode(_flashMode);
+      await newController.initialize();
+      
+      try {
+        await newController.setFlashMode(_flashMode);
+      } catch (e) {
+        debugPrint('Flash not supported on this camera: $e');
+      }
+
       if (mounted) {
-        setState(() => _isInit = true);
+        setState(() {
+          _cameraController = newController;
+          _isInit = true;
+        });
       }
     } catch (e) {
       debugPrint('Error initializing camera $e');
-    }
-    
-    if (oldController != null) {
-      oldController.dispose();
     }
   }
 

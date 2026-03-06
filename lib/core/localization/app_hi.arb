@@ -51,5 +51,6 @@
   "upload": "अपलोड करें",
   "uploading": "अपलोड हो रहा है...",
   "termsOfService": "सेवा की शर्तें",
-  "privacyPolicy": "गोपनीयता नीति"
+  "privacyPolicy": "गोपनीयता नीति",
+  "message": "संदेश"
 }

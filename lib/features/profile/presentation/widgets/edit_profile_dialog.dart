@@ -63,6 +63,9 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
             username: name.isNotEmpty ? name.toLowerCase().replaceAll(' ', '_') : null,
           );
 
+      // Force a refresh so profile image updates across the whole app
+      ref.invalidate(authStateProvider);
+
       if (mounted) {
         Navigator.pop(context, true);
       }

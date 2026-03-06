@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lottie/lottie.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:reelify/features/video_feed/presentation/providers/video_controller_manager.dart';
@@ -42,6 +41,8 @@ class _VideoCardState extends ConsumerState<VideoCard>
   bool _showPlayIcon = false;
   bool _isMuted = false;
   late AnimationController _likeAnimController;
+  late Animation<double> _heartScale;
+  late Animation<double> _heartOpacity;
   bool _showHeartAnimation = false;
   bool _liked = false;
   DateTime? _watchStart;
@@ -52,8 +53,22 @@ class _VideoCardState extends ConsumerState<VideoCard>
     super.initState();
     _likeAnimController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 700),
+      duration: const Duration(milliseconds: 800),
     );
+    
+    _heartScale = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.2).chain(CurveTween(curve: Curves.easeOutBack)), weight: 20),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 1.0).chain(CurveTween(curve: Curves.easeInOut)), weight: 15),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.1).chain(CurveTween(curve: Curves.easeInOut)), weight: 45),
+      TweenSequenceItem(tween: Tween(begin: 1.1, end: 1.5).chain(CurveTween(curve: Curves.easeInBack)), weight: 20),
+    ]).animate(_likeAnimController);
+
+    _heartOpacity = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 15),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.0), weight: 65),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 20),
+    ]).animate(_likeAnimController);
+
     _initVideo();
     if (widget.isActive) _watchStart = DateTime.now();
   }
@@ -243,20 +258,30 @@ class _VideoCardState extends ConsumerState<VideoCard>
               ),
             ),
 
-          // Lottie Heart Animation (double-tap like)
+          // Custom Heart Animation (double-tap like)
           if (_showHeartAnimation)
             Center(
-              child: Lottie.asset(
-                'assets/animations/like_heart.json',
-                controller: _likeAnimController,
-                width: 160,
-                height: 160,
-                onLoaded: (comp) {
-                  _likeAnimController
-                    ..duration = comp.duration
-                    ..forward(from: 0).then((_) {
-                      if (mounted) setState(() => _showHeartAnimation = false);
-                    });
+              child: AnimatedBuilder(
+                animation: _likeAnimController,
+                builder: (context, child) {
+                  return Opacity(
+                    opacity: _heartOpacity.value,
+                    child: Transform.scale(
+                      scale: _heartScale.value,
+                      child: const Icon(
+                        Icons.favorite,
+                        color: Colors.redAccent,
+                        size: 160,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black45,
+                            blurRadius: 15,
+                            offset: Offset(0, 5),
+                          )
+                        ],
+                      ),
+                    ),
+                  );
                 },
               ),
             ),

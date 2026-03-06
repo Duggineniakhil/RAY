@@ -163,4 +163,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get privacyPolicy => 'గోప్యత పాలసీ';
+
+  @override
+  String get message => 'సందేశం';
 }

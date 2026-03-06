@@ -89,6 +89,8 @@ class VideoFeedNotifier extends StateNotifier<VideoFeedState> {
           ? newVideos
           : [...state.videos, ...newVideos];
 
+      if (!mounted) return;
+
       state = state.copyWith(
         videos: allVideos,
         isLoading: false,
@@ -97,6 +99,7 @@ class VideoFeedNotifier extends StateNotifier<VideoFeedState> {
             newVideos.isNotEmpty ? newVideos.last.id : state.lastVideoId,
       );
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(
         isLoading: false,
         error: e.toString(),
@@ -137,6 +140,7 @@ class VideoFeedNotifier extends StateNotifier<VideoFeedState> {
       }
     } catch (e) {
       // Revert on error
+      if (!mounted) return;
       updatedVideos[index] = video;
       state = state.copyWith(videos: updatedVideos);
     }
@@ -146,8 +150,10 @@ class VideoFeedNotifier extends StateNotifier<VideoFeedState> {
     state = state.copyWith(isLoading: true, videos: [], error: null);
     try {
       final videos = await _repo.getVideosByCategory(category);
+      if (!mounted) return;
       state = state.copyWith(videos: videos, isLoading: false, hasMore: false);
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }
@@ -157,8 +163,10 @@ class VideoFeedNotifier extends StateNotifier<VideoFeedState> {
     state = state.copyWith(isLoading: true, videos: [], error: null);
     try {
       final videos = await _repo.searchVideos(query);
+      if (!mounted) return;
       state = state.copyWith(videos: videos, isLoading: false, hasMore: false);
     } catch (e) {
+      if (!mounted) return;
       state = state.copyWith(isLoading: false, error: e.toString());
     }
   }

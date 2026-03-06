@@ -164,4 +164,7 @@ class AppLocalizationsTa extends AppLocalizations {
 
   @override
   String get privacyPolicy => 'தனியுரிமைக் கொள்கை';
+
+  @override
+  String get message => 'செய்தி';
 }

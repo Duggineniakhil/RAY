@@ -163,4 +163,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get privacyPolicy => 'गोपनीयता नीति';
+
+  @override
+  String get message => 'संदेश';
 }

@@ -106,6 +106,18 @@ class _MediaEditorScreenState extends State<MediaEditorScreen> {
                 ? null
                 : () async {
                     if (widget.type == 'video') {
+                      // If the user didn't touch the trim handles, skip unnecessary trimming 
+                      // which would otherwise output a 0-second empty file.
+                      if (_startValue == 0.0 && _endValue == 0.0) {
+                        context.push('/home/post_details', extra: {
+                          'type': widget.type,
+                          'path': _currentPath,
+                          'filterIndex': _filterIndex,
+                          'mode': widget.mode,
+                        });
+                        return;
+                      }
+
                       setState(() => _isExporting = true);
                       await _trimmer.saveTrimmedVideo(
                         startValue: _startValue,

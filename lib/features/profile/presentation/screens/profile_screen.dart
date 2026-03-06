@@ -180,7 +180,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
             ],
           ),
           SliverToBoxAdapter(
-            child: _buildProfileHeader(isOwnProfile, theme, l10n),
+            child: _buildProfileHeader(isOwnProfile, theme, l10n, currentUser),
           ),
           if (!isPrivateAndNotFollowing)
             SliverPersistentHeader(
@@ -235,7 +235,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
-  Widget _buildProfileHeader(bool isOwnProfile, ThemeData theme, AppLocalizations l10n) {
+  Widget _buildProfileHeader(bool isOwnProfile, ThemeData theme, AppLocalizations l10n, UserModel? currentUser) {
     final user = _profileUser;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -284,11 +284,21 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _StatItem(
-                  count: user?.followingCount ?? 0, label: l10n.following),
+              GestureDetector(
+                onTap: () => context.push(
+                    '/home/profile/${widget.userId}/following'),
+                child: _StatItem(
+                    count: user?.followingCount ?? 0,
+                    label: l10n.following),
+              ),
               const SizedBox(width: 24),
-              _StatItem(
-                  count: user?.followersCount ?? 0, label: l10n.followers),
+              GestureDetector(
+                onTap: () => context.push(
+                    '/home/profile/${widget.userId}/followers'),
+                child: _StatItem(
+                    count: user?.followersCount ?? 0,
+                    label: l10n.followers),
+              ),
               const SizedBox(width: 24),
               _StatItem(count: _totalLikes, label: l10n.likes),
               const SizedBox(width: 24),
@@ -300,14 +310,38 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
           // Follow/Edit button
           if (!isOwnProfile)
-            ElevatedButton(
-              onPressed: _toggleFollow,
-              style: ElevatedButton.styleFrom(
-                backgroundColor:
-                    _isFollowing ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.primary,
-                minimumSize: const Size(160, 42),
-              ),
-              child: Text(_isFollowing ? l10n.following : l10n.follow),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _toggleFollow,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        _isFollowing ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.primary,
+                    minimumSize: const Size(140, 42),
+                  ),
+                  child: Text(_isFollowing ? l10n.following : l10n.follow),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton(
+                  onPressed: () {
+                    if (user == null || currentUser == null) return;
+                    // Logic from MessagingScreen to generate the same convId
+                    final me = currentUser.id;
+                    final them = user.id;
+                    final convId = me.compareTo(them) < 0 ? '${me}_$them' : '${them}_$me';
+
+                    context.push(
+                      '/home/messaging/chat/$convId',
+                      extra: {'otherUserId': them, 'otherName': user.displayName},
+                    );
+                  },
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(140, 42),
+                  ),
+                  child: Text(l10n.message),
+                ),
+              ],
             )
           else
             OutlinedButton(

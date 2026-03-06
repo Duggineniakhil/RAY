@@ -25,6 +25,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final VoiceSearchService _voiceSearch = VoiceSearchService();
   bool _isOffline = false;
   bool _isScreenActive = true;
+  bool _isListening = false;
 
   @override
   void initState() {
@@ -36,12 +37,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _seedDummyDataIfNeeded() async {
-    final feedState = ref.read(videoFeedProvider);
-    if (!feedState.isLoading && feedState.videos.isEmpty) {
-      await DummyDataService.seedVideos();
-      if (mounted) {
-        ref.read(videoFeedProvider.notifier).refreshFeed();
-      }
+    final user = ref.read(authStateProvider).valueOrNull;
+    
+    // Always call this so it can do its internal check and cleanup bad Mixkit URLs
+    await DummyDataService.seedVideos();
+    
+    if (user != null) {
+      await DummyDataService.seedMessaging(user.id);
+    }
+    
+    if (mounted) {
+      ref.read(videoFeedProvider.notifier).refreshFeed();
     }
   }
 
@@ -83,12 +89,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _startVoiceSearch() async {
-    final result = await _voiceSearch.listenForCommand();
-    if (result != null && mounted) {
-      ref.read(videoFeedProvider.notifier).searchVideos(result);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Searching: "$result"')),
-      );
+    if (_isListening) {
+      await _voiceSearch.stop();
+      if (mounted) setState(() => _isListening = false);
+      return;
+    }
+    setState(() => _isListening = true);
+    try {
+      final result = await _voiceSearch.listenForCommand();
+      if (mounted) {
+        setState(() => _isListening = false);
+        if (result != null && result.isNotEmpty) {
+          ref.read(videoFeedProvider.notifier).searchVideos(result);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.mic_rounded, color: Colors.white, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text('Searching: "$result"')),
+                ],
+              ),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Row(
+                children: [
+                  Icon(Icons.mic_off_rounded, color: Colors.white, size: 18),
+                  SizedBox(width: 8),
+                  Text('Nothing heard. Try again!'),
+                ],
+              ),
+              backgroundColor: Colors.grey.shade700,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isListening = false);
     }
   }
 
@@ -123,10 +172,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.mic_rounded, color: Colors.white),
-            onPressed: _startVoiceSearch,
-            tooltip: l10n.voiceSearch,
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: IconButton(
+              key: ValueKey(_isListening),
+              icon: Icon(
+                _isListening ? Icons.mic_off_rounded : Icons.mic_rounded,
+                color: _isListening
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.white,
+              ),
+              onPressed: _startVoiceSearch,
+              tooltip: _isListening ? 'Stop listening' : l10n.voiceSearch,
+            ),
           ),
         ],
       ),
@@ -226,6 +284,51 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(width: 6),
                     Text(l10n.noInternet,
                         style: const TextStyle(color: Colors.white, fontSize: 11)),
+                  ],
+                ),
+              ),
+            ),
+          // Voice listening overlay
+          if (_isListening)
+            Positioned.fill(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.65),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const _PulsingMicIcon(),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Listening\u2026',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.5),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Say something like "show dance" or "find travel"',
+                      style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.7),
+                          fontSize: 13),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 36),
+                    GestureDetector(
+                      onTap: _startVoiceSearch,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 28, vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.white54),
+                          borderRadius: BorderRadius.circular(28),
+                        ),
+                        child: const Text('Cancel',
+                            style: TextStyle(
+                                color: Colors.white, fontSize: 14)),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -344,3 +447,69 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Pulsing Mic Icon for Voice Overlay
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _PulsingMicIcon extends StatefulWidget {
+  const _PulsingMicIcon();
+
+  @override
+  State<_PulsingMicIcon> createState() => _PulsingMicIconState();
+}
+
+class _PulsingMicIconState extends State<_PulsingMicIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+    _scale = Tween<double>(begin: 0.85, end: 1.15).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _scale,
+      builder: (_, __) => Transform.scale(
+        scale: _scale.value,
+        child: Container(
+          width: 88,
+          height: 88,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Theme.of(context).colorScheme.primary,
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary
+                    .withValues(alpha: 0.5 * _scale.value),
+                blurRadius: 24,
+                spreadRadius: 4,
+              ),
+            ],
+          ),
+          child: const Icon(Icons.mic_rounded,
+              color: Colors.white, size: 42),
+        ),
+      ),
+    );
+  }
+}
+

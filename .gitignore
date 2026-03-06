@@ -77,3 +77,5 @@ macos/.symlinks/
 *.keystore
 key.properties
 android/key.properties
+
+.vercel

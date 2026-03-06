@@ -413,6 +413,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Privacy Policy'**
   String get privacyPolicy;
+
+  /// No description provided for @message.
+  ///
+  /// In en, this message translates to:
+  /// **'Message'**
+  String get message;
 }
 
 class _AppLocalizationsDelegate
