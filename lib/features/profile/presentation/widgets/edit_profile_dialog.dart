@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
 import 'package:reelify/generated/app_localizations.dart';
 import 'package:reelify/features/auth/domain/models/user_model.dart';
 import 'package:reelify/features/auth/presentation/providers/auth_provider.dart';
 import 'package:reelify/core/services/storage_service.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:io' as io;
 
 class EditProfileDialog extends ConsumerStatefulWidget {
   final UserModel user;
@@ -20,7 +21,7 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
   late TextEditingController _nameController;
   late TextEditingController _bioController;
   bool _isLoading = false;
-  File? _imageFile;
+  XFile? _imageFile;
   final _picker = ImagePicker();
   final _storage = StorageService();
 
@@ -41,7 +42,7 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (pickedFile != null) {
-      setState(() => _imageFile = File(pickedFile.path));
+      setState(() => _imageFile = pickedFile);
     }
   }
 
@@ -53,7 +54,9 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
 
       String? photoUrl;
       if (_imageFile != null) {
-        photoUrl = await _storage.uploadProfileImage(_imageFile!);
+        final bytes = await _imageFile!.readAsBytes();
+        final extension = _imageFile!.name.split('.').last;
+        photoUrl = await _storage.uploadProfileImage(bytes, extension);
       }
 
       await ref.read(authRepositoryProvider).updateProfile(
@@ -63,7 +66,6 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
             username: name.isNotEmpty ? name.toLowerCase().replaceAll(' ', '_') : null,
           );
 
-      // Force a refresh so profile image updates across the whole app
       ref.invalidate(authStateProvider);
 
       if (mounted) {
@@ -85,6 +87,17 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
+    ImageProvider? profileImageProvider;
+    if (_imageFile != null) {
+      if (kIsWeb) {
+        profileImageProvider = NetworkImage(_imageFile!.path);
+      } else {
+        profileImageProvider = FileImage(io.File(_imageFile!.path));
+      }
+    } else if (widget.user.profileImage.isNotEmpty) {
+      profileImageProvider = NetworkImage(widget.user.profileImage);
+    }
+
     return AlertDialog(
       backgroundColor: theme.colorScheme.surface,
       title: Text(l10n.editProfile, style: TextStyle(color: theme.colorScheme.onSurface)),
@@ -99,12 +112,8 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
                   child: CircleAvatar(
                     radius: 40,
                     backgroundColor: theme.colorScheme.surfaceContainerHighest,
-                    backgroundImage: _imageFile != null
-                        ? FileImage(_imageFile!)
-                        : (widget.user.profileImage.isNotEmpty
-                            ? NetworkImage(widget.user.profileImage)
-                            : null) as ImageProvider?,
-                    child: _imageFile == null && widget.user.profileImage.isEmpty
+                    backgroundImage: profileImageProvider,
+                    child: profileImageProvider == null
                         ? Icon(Icons.person, size: 40, color: theme.hintColor)
                         : null,
                   ),
@@ -124,29 +133,29 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
               ],
             ),
             const SizedBox(height: 16),
-          TextField(
-            controller: _nameController,
-            style: TextStyle(color: theme.colorScheme.onSurface),
-            decoration: InputDecoration(
-              labelText: l10n.displayName,
-              labelStyle: TextStyle(color: theme.hintColor),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: theme.dividerColor)),
+            TextField(
+              controller: _nameController,
+              style: TextStyle(color: theme.colorScheme.onSurface),
+              decoration: InputDecoration(
+                labelText: l10n.displayName,
+                labelStyle: TextStyle(color: theme.hintColor),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: theme.dividerColor)),
+              ),
             ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _bioController,
-            style: TextStyle(color: theme.colorScheme.onSurface),
-            maxLength: 100,
-            decoration: InputDecoration(
-              labelText: l10n.bio,
-              labelStyle: TextStyle(color: theme.hintColor),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: theme.dividerColor)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _bioController,
+              style: TextStyle(color: theme.colorScheme.onSurface),
+              maxLength: 100,
+              decoration: InputDecoration(
+                labelText: l10n.bio,
+                labelStyle: TextStyle(color: theme.hintColor),
+                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: theme.dividerColor)),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.pop(context, false),
@@ -155,7 +164,10 @@ class _EditProfileDialogState extends ConsumerState<EditProfileDialog> {
         TextButton(
           onPressed: _isLoading ? null : _save,
           child: _isLoading
-              ? SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary))
+              ? SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: theme.colorScheme.primary))
               : Text(l10n.save, style: TextStyle(color: theme.colorScheme.primary)),
         ),
       ],

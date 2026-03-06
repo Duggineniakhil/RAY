@@ -11,7 +11,7 @@ class DummyDataService {
 
     final dummyVideos = [
       {
-        'caption': 'Big Buck Bunny! 🐰� #funny #animation',
+        'caption': 'Big Buck Bunny! 🐰 #funny #animation',
         'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
         'thumbnail': 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=400',
         'creatorId': 'dummy_1',
@@ -23,7 +23,6 @@ class DummyDataService {
         'shares': 88,
         'category': 'Comedy',
         'hashtags': ['funny', 'animation'],
-        'filterIndex': 0,
         'uploadTime': Timestamp.now(),
       },
       {
@@ -39,7 +38,6 @@ class DummyDataService {
         'shares': 34,
         'category': 'Art',
         'hashtags': ['aesthetic', 'shortfilm', 'art'],
-        'filterIndex': 0,
         'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 2))),
       },
       {
@@ -55,11 +53,10 @@ class DummyDataService {
         'shares': 210,
         'category': 'Travel',
         'hashtags': ['action', 'travel', 'fire'],
-        'filterIndex': 0,
         'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 5))),
       },
       {
-        'caption': 'For Bigger Escapes 🏃� #escape #viral',
+        'caption': 'For Bigger Escapes 🏃 #escape #viral',
         'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
         'thumbnail': 'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=400',
         'creatorId': 'dummy_4',
@@ -71,11 +68,10 @@ class DummyDataService {
         'shares': 980,
         'category': 'Action',
         'hashtags': ['escape', 'viral', 'action'],
-        'filterIndex': 0,
         'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 8))),
       },
       {
-        'caption': 'For Bigger Fun � #fun #gaming',
+        'caption': 'For Bigger Fun 🎮 #fun #gaming',
         'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
         'thumbnail': 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=400',
         'creatorId': 'dummy_5',
@@ -87,7 +83,6 @@ class DummyDataService {
         'shares': 430,
         'category': 'Gaming',
         'hashtags': ['gaming', 'setup', 'fun'],
-        'filterIndex': 0,
         'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(hours: 12))),
       },
       {
@@ -103,7 +98,6 @@ class DummyDataService {
         'shares': 720,
         'category': 'Travel',
         'hashtags': ['cars', 'ocean', 'travel'],
-        'filterIndex': 0,
         'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1))),
       },
       {
@@ -119,11 +113,10 @@ class DummyDataService {
         'shares': 290,
         'category': 'Lifestyle',
         'hashtags': ['autumn', 'cozy', 'aesthetic'],
-        'filterIndex': 1,
         'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 1, hours: 6))),
       },
       {
-        'caption': 'Sintel � #fantasy #workout #gym',
+        'caption': 'Sintel 🏹 #fantasy #adventure',
         'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
         'thumbnail': 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80&w=400',
         'creatorId': 'dummy_6',
@@ -133,29 +126,12 @@ class DummyDataService {
         'commentsCount': 98,
         'views': 22000,
         'shares': 380,
-        'category': 'Fitness',
+        'category': 'Fantasy',
         'hashtags': ['fitness', 'workout', 'gym'],
-        'filterIndex': 0,
         'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 2))),
       },
       {
-        'caption': 'Subaru Outback on Street and Dirt 🚘 #travel #street',
-        'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
-        'thumbnail': 'https://images.unsplash.com/photo-1555992336-03a23c7b20ee?auto=format&fit=crop&q=80&w=400',
-        'creatorId': 'dummy_3',
-        'creatorName': 'ram.bites',
-        'type': 'video',
-        'likes': 6100,
-        'commentsCount': 232,
-        'views': 55000,
-        'shares': 1100,
-        'category': 'Travel',
-        'hashtags': ['travel', 'food', 'street'],
-        'filterIndex': 0,
-        'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 2, hours: 3))),
-      },
-      {
-        'caption': 'Tears of Steel 🤖✨ #city #nightlife #photography',
+        'caption': 'Tears of Steel 🤖✨ #city #nightlife #scifi',
         'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
         'thumbnail': 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&q=80&w=400',
         'creatorId': 'dummy_4',
@@ -167,129 +143,150 @@ class DummyDataService {
         'shares': 560,
         'category': 'Photography',
         'hashtags': ['city', 'nightlife', 'photography'],
-        'filterIndex': 2,
         'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 3))),
       },
       {
-        'videoUrl': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
-        'creatorId': 'dummy_d',
-        'creatorName': 'Sri',
         'caption': 'Adrenaline pumping! #bullrun #excitement',
-        'hashtags': ['bullrun', 'excitement'],
-        'category': 'Vlog',
+        'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.mp4',
+        'thumbnail': 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=400',
+        'creatorId': 'dummy_7',
+        'creatorName': 'ananya.pixels',
+        'type': 'video',
         'likes': 11200,
         'views': 45000,
         'commentsCount': 890,
+        'shares': 450,
+        'category': 'Vlog',
+        'hashtags': ['bullrun', 'excitement'],
+        'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 3, hours: 2))),
       },
       {
-        'videoUrl': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4',
-        'creatorId': 'dummy_f',
-        'creatorName': 'Karthik',
         'caption': 'Budget car hunting 🚗 #cars #budget #review',
-        'hashtags': ['cars', 'budget', 'review'],
-        'category': 'Cars',
+        'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4',
+        'thumbnail': 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&q=80&w=400',
+        'creatorId': 'dummy_8',
+        'creatorName': 'david.lens',
+        'type': 'video',
         'likes': 15600,
         'views': 67000,
         'commentsCount': 420,
+        'shares': 310,
+        'category': 'Cars',
+        'hashtags': ['cars', 'budget', 'review'],
+        'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 4))),
       },
       {
-        'videoUrl': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
-        'creatorId': 'dummy_e',
-        'creatorName': 'Priya',
-        'caption': 'Is the GTI still the king of hot hatches? 🔥 #vw #gti #cars',
-        'hashtags': ['vw', 'gti', 'cars'],
-        'category': 'Cars',
+        'caption': 'Is the GTI still the king? 🔥 #vw #gti #cars',
+        'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4',
+        'thumbnail': 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=400',
+        'creatorId': 'dummy_5',
+        'creatorName': 'priya.fps',
+        'type': 'video',
         'likes': 21000,
         'views': 95000,
         'commentsCount': 1200,
+        'shares': 780,
+        'category': 'Cars',
+        'hashtags': ['vw', 'gti', 'cars'],
+        'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 5))),
       },
       {
-        'videoUrl': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
-        'creatorId': 'dummy_g',
-        'creatorName': 'Ananya',
-        'caption': 'Outback adventure! On and off-road 🌲 #subaru #adventure #offroad',
-        'hashtags': ['subaru', 'adventure', 'offroad'],
-        'category': 'Vlog',
+        'caption': 'Outback adventure! On and off-road 🌲 #subaru #adventure',
+        'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4',
+        'thumbnail': 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=400',
+        'creatorId': 'dummy_3',
+        'creatorName': 'ram.bites',
+        'type': 'video',
         'likes': 9800,
         'views': 34000,
         'commentsCount': 210,
+        'shares': 120,
+        'category': 'Vlog',
+        'hashtags': ['subaru', 'adventure', 'offroad'],
+        'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 6))),
       },
       {
-        'videoUrl': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
-        'creatorId': 'dummy_a',
-        'creatorName': 'Ratan',
-        'caption': 'Sci-fi short film classic 🤖 #scifi #blender #shortfilm',
-        'hashtags': ['scifi', 'blender', 'shortfilm'],
-        'category': 'Entertainment',
-        'likes': 45000,
-        'views': 250000,
-        'commentsCount': 3100,
-      },
-      {
-        'videoUrl': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
-        'creatorId': 'dummy_b',
-        'creatorName': 'John',
-        'caption': 'Sintel: The Dragon Tale 🐉 #animation #fantasy #epic',
-        'hashtags': ['animation', 'fantasy', 'epic'],
-        'category': 'Entertainment',
-        'likes': 75000,
-        'views': 500000,
-        'commentsCount': 6200,
-      },
-      {
-        'videoUrl': 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-        'creatorId': 'dummy_c',
-        'creatorName': 'Ram',
-        'caption': 'Abstract and wonderful 🐘 #abstract #cgi #art',
-        'hashtags': ['abstract', 'cgi', 'art'],
-        'category': 'Art',
-        'likes': 8900,
-        'views': 41000,
+        'caption': 'The Jellyfish 🌊 #nature #ocean',
+        'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+        'thumbnail': 'https://images.unsplash.com/photo-1544923246-77307dd654ca?auto=format&fit=crop&q=80&w=400',
+        'creatorId': 'dummy_2',
+        'creatorName': 'john.captures',
+        'type': 'video',
+        'likes': 15000,
+        'views': 78000,
         'commentsCount': 190,
+        'shares': 560,
+        'category': 'Nature',
+        'hashtags': ['nature', 'ocean', 'peace'],
+        'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 7))),
+      },
+      {
+        'caption': 'Morning coffee vibes ☕ #aesthetic #vlog',
+        'videoUrl': 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        'thumbnail': 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&q=80&w=400',
+        'creatorId': 'dummy_1',
+        'creatorName': 'ratan.writes',
+        'type': 'video',
+        'likes': 8200,
+        'views': 29000,
+        'commentsCount': 110,
+        'shares': 88,
+        'category': 'Vlog',
+        'hashtags': ['coffee', 'morning', 'vlog'],
+        'uploadTime': Timestamp.fromDate(DateTime.now().subtract(const Duration(days: 8))),
       },
     ];
 
-    // Cleanup old broken Mixkit videos if they exist, or seed if no dummy videos exist
-    bool requiresVideoSeeding = true;
+    // Aggressive cleanup: Find and delete ANY duplicate dummy videos by URL
+    final allDummies = await videosCollection
+        .where('creatorId', isGreaterThanOrEqualTo: 'dummy_')
+        .where('creatorId', isLessThanOrEqualTo: 'dummy_z')
+        .get();
     
-    final dummyVideosSnapshot = await videosCollection
+    final seenUrls = <String>{};
+    final batchDelete = firestore.batch();
+    bool deletedAny = false;
+
+    for (var doc in allDummies.docs) {
+      final url = doc.data()['videoUrl'] as String;
+      if (seenUrls.contains(url)) {
+        batchDelete.delete(doc.reference);
+        deletedAny = true;
+      } else {
+        seenUrls.add(url);
+      }
+    }
+    if (deletedAny) await batchDelete.commit();
+
+    // Re-check count after cleanup
+    final cleanDummies = await videosCollection
         .where('creatorId', isGreaterThanOrEqualTo: 'dummy_')
         .where('creatorId', isLessThanOrEqualTo: 'dummy_z')
         .limit(20)
         .get();
 
-    if (dummyVideosSnapshot.docs.isNotEmpty) {
-      final oldVid = dummyVideosSnapshot.docs.first.data();
-      if ((oldVid['videoUrl'] as String).contains('mixkit')) {
-        // Find and blow away all dummy videos
-        final toDelete = await videosCollection
-            .where('creatorId', isGreaterThanOrEqualTo: 'dummy_')
-            .where('creatorId', isLessThanOrEqualTo: 'dummy_z')
-            .get();
-        final batchDelete = firestore.batch();
-        for (var doc in toDelete.docs) {
-          batchDelete.delete(doc.reference);
-        }
-        await batchDelete.commit();
-      } else if (dummyVideosSnapshot.docs.length >= 15) {
-        // We already have the new expanded dummy videos seeded
-        requiresVideoSeeding = false;
-      }
+    if (cleanDummies.docs.length >= dummyVideos.length) {
+      // Already has the full unique set
+      return;
     }
 
-    if (!requiresVideoSeeding) return;
-
+    // Seed missing videos
+    final existingUrls = cleanDummies.docs.map((d) => d.data()['videoUrl'] as String).toSet();
     final batch = firestore.batch();
     final videoIds = <String>[];
+    
     for (final v in dummyVideos) {
-      final docRef = videosCollection.doc();
-      videoIds.add(docRef.id);
-      batch.set(docRef, v);
+      if (!existingUrls.contains(v['videoUrl'])) {
+        final docRef = videosCollection.doc();
+        videoIds.add(docRef.id);
+        batch.set(docRef, v);
+      }
     }
-    await batch.commit();
-
-    // Seed comments after videos exist
-    await _seedComments(firestore, videoIds);
+    
+    if (videoIds.isNotEmpty) {
+      await batch.commit();
+      await _seedComments(firestore, videoIds);
+    }
   }
 
   static Future<void> _seedUsers(FirebaseFirestore firestore) async {

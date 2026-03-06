@@ -12,52 +12,69 @@ class ExploreRepository {
       query = query.where('category', isEqualTo: category);
     }
 
-    // Ranking: Primary sort by likes (engagement), secondary by views.
-    // Using two separate queries and merging client-side to avoid composite index requirements.
     final snapshot = await query
-        .limit(30)
+        .limit(50)
         .get();
 
     final videos = snapshot.docs.map((doc) => VideoModel.fromFirestore(doc)).toList();
+    
+    // UI Deduplication: Filter out videos with duplicate URLs or IDs
+    final seenUrls = <String>{};
+    final uniqueVideos = videos.where((v) {
+      if (seenUrls.contains(v.videoUrl)) return false;
+      seenUrls.add(v.videoUrl);
+      return true;
+    }).toList();
+
     // Secondary sort by views for equal likes
-    videos.sort((a, b) {
+    uniqueVideos.sort((a, b) {
       if (b.likes != a.likes) return b.likes.compareTo(a.likes);
       return b.views.compareTo(a.views);
     });
-    return videos.take(20).toList();
+
+    return uniqueVideos.take(20).toList();
   }
 
   Future<List<VideoModel>> searchVideos(String searchTerm) async {
     final term = searchTerm.replaceAll('#', '').toLowerCase().trim();
     if (term.isEmpty) return [];
 
-    // Search by hashtags match
     final hashtagSnap = await _firestore
         .collection(AppConstants.videosCollection)
         .where('hashtags', arrayContains: term)
-        .limit(20)
+        .limit(30)
         .get();
 
     final results = hashtagSnap.docs.map((doc) => VideoModel.fromFirestore(doc)).toList();
 
-    // If no hashtag results, fall back to caption search (client-side)
     if (results.isEmpty) {
       final allSnap = await _firestore
           .collection(AppConstants.videosCollection)
           .orderBy('uploadTime', descending: true)
-          .limit(50)
+          .limit(100)
           .get();
-      return allSnap.docs
+      
+      final filtered = allSnap.docs
           .map((doc) => VideoModel.fromFirestore(doc))
           .where((v) =>
               v.caption.toLowerCase().contains(term) ||
               v.category.toLowerCase().contains(term) ||
               v.creatorName.toLowerCase().contains(term))
-          .take(20)
           .toList();
+      
+      return _deduplicate(filtered).take(20).toList();
     }
 
-    return results;
+    return _deduplicate(results).take(20).toList();
+  }
+
+  List<VideoModel> _deduplicate(List<VideoModel> videos) {
+    final seenUrls = <String>{};
+    return videos.where((v) {
+      if (seenUrls.contains(v.videoUrl)) return false;
+      seenUrls.add(v.videoUrl);
+      return true;
+    }).toList();
   }
 }
 

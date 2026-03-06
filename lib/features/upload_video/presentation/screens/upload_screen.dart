@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -12,6 +10,8 @@ import 'package:reelify/widgets/gradient_button.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
 class UploadScreen extends ConsumerStatefulWidget {
   const UploadScreen({super.key});
@@ -22,11 +22,12 @@ class UploadScreen extends ConsumerStatefulWidget {
 
 class _UploadScreenState extends ConsumerState<UploadScreen> {
   final _captionController = TextEditingController();
-  File? _videoFile;
+  XFile? _videoFile;
   String _selectedCategory = AppConstants.videoCategories.first;
   double _uploadProgress = 0;
   bool _isUploading = false;
   final _uuid = const Uuid();
+  final _picker = ImagePicker();
 
   @override
   void dispose() {
@@ -35,12 +36,16 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
   }
 
   Future<void> _pickVideo() async {
-    final result = await FilePicker.platform.pickFiles(
-      type: FileType.video,
-      allowMultiple: false,
-    );
-    if (result != null && result.files.single.path != null) {
-      setState(() => _videoFile = File(result.files.single.path!));
+    try {
+      final pickedFile = await _picker.pickVideo(
+        source: ImageSource.gallery,
+        maxDuration: const Duration(minutes: 5),
+      );
+      if (pickedFile != null) {
+        setState(() => _videoFile = pickedFile);
+      }
+    } catch (e) {
+      debugPrint('Error picking video: $e');
     }
   }
 
@@ -64,15 +69,23 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
       final url = Uri.parse('https://api.cloudinary.com/v1_1/$cloudName/video/upload');
       final request = http.MultipartRequest('POST', url)
         ..fields['upload_preset'] = uploadPreset
-        ..fields['public_id'] = 'reelify/${user.id}/$videoId'
-        ..files.add(await http.MultipartFile.fromPath('file', _videoFile!.path));
+        ..fields['public_id'] = 'reelify/${user.id}/$videoId';
+
+      if (kIsWeb) {
+        final bytes = await _videoFile!.readAsBytes();
+        request.files.add(http.MultipartFile.fromBytes(
+          'file',
+          bytes,
+          filename: _videoFile!.name,
+        ));
+      } else {
+        request.files.add(await http.MultipartFile.fromPath('file', _videoFile!.path));
+      }
 
       // Stream the upload progress
       final httpClient = http.Client();
       final streamedResponse = await httpClient.send(request);
       
-      // We don't have exact progress tracking with basic http streamedResponse easily without an interceptor,
-      // so we simulate progress for UX, or just show an indeterminate indicator in the UI.
       setState(() {
          _uploadProgress = 0.5; // Simulate progress
       });
@@ -97,7 +110,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
           .doc(videoId)
           .set({
         'videoUrl': videoUrl,
-        'thumbnail': '',
+        'thumbnail': jsonResponse['thumbnail_url'] ?? '',
         'creatorId': user.id,
         'creatorName': user.username,
         'creatorAvatar': user.profileImage,
@@ -182,7 +195,7 @@ class _UploadScreenState extends ConsumerState<UploadScreen> {
                           Positioned(
                             bottom: 8,
                             child: Text(
-                              _videoFile!.path.split('/').last,
+                              _videoFile!.name,
                               style: TextStyle(
                                   color: theme.hintColor,
                                   fontSize: 12),
