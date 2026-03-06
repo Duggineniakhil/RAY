@@ -62,7 +62,7 @@ flutter build web
 cd build/web
 vercel
 ```
-- **Live Link**: [https://reelify-nu.vercel.app](https://reelify-nu.vercel.app)
+- **Live Link**: [https://reelify-fwy1ag88o-akhils-projects-3b636e7b.vercel.app/](https://reelify-fwy1ag88o-akhils-projects-3b636e7b.vercel.app/)
 
 
 ---

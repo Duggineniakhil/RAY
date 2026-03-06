@@ -3,12 +3,12 @@
 An AI-powered, immersive short-video entertainment platform built with **Flutter** and **Firebase**. RAY (Reelify) combines the high-velocity experience of TikTok with innovative AI Voice Assistant capabilities to create a modern, accessible, and high-performance social media ecosystem.
 
 ![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
-![Live Demo](https://img.shields.io/badge/Live-Demo-red?link=https://reelify-nu.vercel.app)
+![Live Demo](https://img.shields.io/badge/Live-Demo-red?link=https://reelify-fwy1ag88o-akhils-projects-3b636e7b.vercel.app/)
 ![Flutter](https://img.shields.io/badge/Flutter-%3E%3D3.0.0-blue)
 ![Firebase](https://img.shields.io/badge/Firebase-Integrated-orange)
 ![AI](https://img.shields.io/badge/AI-Voice%20Navigation-purple)
 
-**Live Web App**: [https://reelify-nu.vercel.app](https://reelify-nu.vercel.app)
+**Live Web App**: [https://reelify-fwy1ag88o-akhils-projects-3b636e7b.vercel.app/](https://reelify-fwy1ag88o-akhils-projects-3b636e7b.vercel.app/)
 
 ## 🌟 Key Features
 

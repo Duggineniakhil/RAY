@@ -1,6 +1,6 @@
 # RAY Delivery Document: Short Video Viewer App
 
-**Vercel Deployment Link**: [https://reelify-nu.vercel.app](https://reelify-nu.vercel.app)
+**Vercel Deployment Link**: [https://reelify-fwy1ag88o-akhils-projects-3b636e7b.vercel.app/](https://reelify-fwy1ag88o-akhils-projects-3b636e7b.vercel.app/)
 
 ## Project Overview
 RAY is an AI-powered, immersive short-video entertainment platform. It leverages AI for personalized video recommendations and a unique voice assistant for hands-free navigation. The system is built using Flutter and Firebase, ensuring high performance, real-time synchronization, and cross-platform scalability.
