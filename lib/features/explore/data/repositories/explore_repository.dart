@@ -15,7 +15,6 @@ class ExploreRepository {
     // Ranking: Primary sort by likes (engagement), secondary by views.
     // Using two separate queries and merging client-side to avoid composite index requirements.
     final snapshot = await query
-        .orderBy('likes', descending: true)
         .limit(30)
         .get();
 

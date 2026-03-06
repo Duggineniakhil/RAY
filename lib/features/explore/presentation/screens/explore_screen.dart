@@ -123,24 +123,20 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
 
 class _ExploreVideoGrid extends ConsumerWidget {
   final String? selectedCategory;
-  const _ExploreVideoGrid({this.selectedCategory});
+  final List<VideoModel>? searchResults;
+
+  const _ExploreVideoGrid({this.selectedCategory, this.searchResults});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final exploreState = ref.watch(exploreProvider);
-    final videos = exploreState.trendingVideos;
+    final videos = searchResults ?? exploreState.trendingVideos;
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
 
     if (exploreState.isLoading && videos.isEmpty) {
       return Center(
-        child: Lottie.asset(
-          'assets/animations/loading.json',
-          width: 120,
-          height: 120,
-          errorBuilder: (_, __, ___) =>
-              CircularProgressIndicator(color: theme.colorScheme.primary),
-        ),
+        child: CircularProgressIndicator(color: theme.colorScheme.primary),
       );
     }
 
@@ -149,13 +145,7 @@ class _ExploreVideoGrid extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Lottie.asset(
-              'assets/animations/empty_state.json',
-              width: 160,
-              height: 160,
-              errorBuilder: (_, __, ___) =>
-                  Icon(Icons.video_library_outlined, color: theme.hintColor, size: 64),
-            ),
+            Icon(Icons.video_library_outlined, color: theme.hintColor, size: 64),
             const SizedBox(height: 8),
             Text(
               selectedCategory != null
@@ -177,47 +167,62 @@ class _ExploreVideoGrid extends ConsumerWidget {
         childAspectRatio: 0.6,
       ),
       itemCount: videos.length,
-      itemBuilder: (context, i) => _VideoGridTile(video: videos[i]),
+      itemBuilder: (context, i) => _VideoGridTile(
+        videos: videos,
+        index: i,
+      ),
     );
   }
 }
 
 class _VideoGridTile extends StatelessWidget {
-  final VideoModel video;
-  const _VideoGridTile({required this.video});
+  final List<VideoModel> videos;
+  final int index;
+
+  const _VideoGridTile({required this.videos, required this.index});
 
   @override
   Widget build(BuildContext context) {
+    final video = videos[index];
     final theme = Theme.of(context);
     return GestureDetector(
-      onTap: () => context.push('/home/video', extra: video),
+      onTap: () => context.push('/home/video', extra: {
+        'videos': videos,
+        'initialIndex': index,
+      }),
       child: Stack(
         fit: StackFit.expand,
         children: [
-        video.thumbnail.isNotEmpty
-            ? Image.network(video.thumbnail, fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: theme.colorScheme.surface))
-            : Container(
-                color: theme.colorScheme.surface,
-                child: Icon(Icons.play_circle_outline_rounded,
-                    color: theme.hintColor, size: 32),
-              ),
-        // View count overlay
-        Positioned(
-          bottom: 4,
-          left: 4,
-          child: Row(
-            children: [
-              const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 14),
-              const SizedBox(width: 2),
-              Text(
-                _format(video.views),
-                style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600),
-              ),
-            ],
+          video.thumbnail.isNotEmpty
+              ? Image.network(video.thumbnail,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      Container(color: theme.colorScheme.surface))
+              : Container(
+                  color: theme.colorScheme.surface,
+                  child: Icon(Icons.play_circle_outline_rounded,
+                      color: theme.hintColor, size: 32),
+                ),
+          // View count overlay
+          Positioned(
+            bottom: 4,
+            left: 4,
+            child: Row(
+              children: [
+                const Icon(Icons.play_arrow_rounded,
+                    color: Colors.white, size: 14),
+                const SizedBox(width: 2),
+                Text(
+                  _format(video.views),
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
       ),
     );
   }
@@ -228,6 +233,7 @@ class _VideoGridTile extends StatelessWidget {
     return n.toString();
   }
 }
+
 
 class _VideoSearchDelegate extends SearchDelegate<String> {
   final WidgetRef ref;
@@ -249,9 +255,19 @@ class _VideoSearchDelegate extends SearchDelegate<String> {
 
   @override
   Widget buildResults(BuildContext context) {
-    ref.read(exploreProvider.notifier).search(query);
-    close(context, query);
-    return const SizedBox();
+    if (query.trim().isEmpty) return const SizedBox();
+    
+    // Trigger the search
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(exploreProvider.notifier).search(query);
+    });
+
+    return Consumer(
+      builder: (context, ref, child) {
+        final state = ref.watch(exploreProvider);
+        return _ExploreVideoGrid(searchResults: state.trendingVideos);
+      },
+    );
   }
 
   @override

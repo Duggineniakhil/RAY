@@ -203,8 +203,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             path: 'video',
             name: 'video',
             builder: (context, state) {
-              final video = state.extra as VideoModel;
-              return SingleVideoScreen(video: video);
+              final extra = state.extra as Map<String, dynamic>;
+              return SingleVideoScreen(
+                videos: extra['videos'] as List<VideoModel>,
+                initialIndex: extra['initialIndex'] as int? ?? 0,
+              );
             },
           ),
         ],
