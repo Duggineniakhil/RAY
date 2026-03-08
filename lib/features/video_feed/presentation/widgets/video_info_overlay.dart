@@ -5,8 +5,9 @@ import 'package:reelify/features/video_feed/domain/models/video_model.dart';
 
 class VideoInfoOverlay extends StatelessWidget {
   final VideoModel video;
+  final VoidCallback? onProfile;
 
-  const VideoInfoOverlay({super.key, required this.video});
+  const VideoInfoOverlay({super.key, required this.video, this.onProfile});
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +18,16 @@ class VideoInfoOverlay extends StatelessWidget {
         // Creator name
         Row(
           children: [
-            Text(
-              '@${video.creatorName.isNotEmpty ? video.creatorName : 'creator'}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                shadows: [Shadow(blurRadius: 4, color: Colors.black87)],
+            GestureDetector(
+              onTap: onProfile,
+              child: Text(
+                '@${video.creatorName.isNotEmpty ? video.creatorName : 'creator'}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  shadows: [Shadow(blurRadius: 4, color: Colors.black87)],
+                ),
               ),
             ),
             if (video.category.isNotEmpty) ...[

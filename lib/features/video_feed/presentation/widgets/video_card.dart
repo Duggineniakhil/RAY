@@ -306,7 +306,10 @@ class _VideoCardState extends ConsumerState<VideoCard>
             left: 12,
             right: 80,
             bottom: 10,
-            child: VideoInfoOverlay(video: widget.video),
+            child: VideoInfoOverlay(
+              video: widget.video,
+              onProfile: widget.onProfile,
+            ),
           ),
 
           // Mute button

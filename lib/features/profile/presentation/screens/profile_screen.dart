@@ -157,6 +157,37 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       );
     }
 
+    if (_profileUser == null) {
+      return Scaffold(
+        appBar: AppBar(
+          backgroundColor: theme.scaffoldBackgroundColor,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            onPressed: () => context.pop(),
+          ),
+          title: Text(l10n.profile),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.person_off_rounded, size: 64, color: theme.hintColor),
+              const SizedBox(height: 16),
+              Text(
+                'User Not Found',
+                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'The user you are looking for does not exist.',
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final isPrivateAndNotFollowing = (_profileUser?.isPrivate ?? false) && !_isFollowing && !isOwnProfile;
 
     return Scaffold(
@@ -170,7 +201,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               icon: const Icon(Icons.arrow_back_ios_new_rounded),
               onPressed: () => context.pop(),
             ),
-            title: Text(_profileUser?.username ?? l10n.profile),
+            title: Text(_profileUser?.displayName ?? _profileUser?.username ?? l10n.profile),
             actions: [
               if (isOwnProfile)
                 IconButton(
@@ -263,11 +294,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
           const SizedBox(height: 12),
 
-          Text('@${user?.username ?? 'user'}',
+          Text(user?.displayName ?? user?.username ?? '...',
               style: TextStyle(
                 color: theme.colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
+              )),
+
+          Text('@${user?.username ?? 'user'}',
+              style: TextStyle(
+                color: theme.hintColor,
+                fontSize: 14,
               )),
 
           if (user?.bio.isNotEmpty == true) ...[
